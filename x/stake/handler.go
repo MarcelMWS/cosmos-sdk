@@ -2,7 +2,6 @@ package stake
 
 import (
 	"bytes"
-	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/stake/keeper"
@@ -31,10 +30,28 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 	}
 }
 
-// Called every block, process inflation, update validator set
-func EndBlocker(ctx sdk.Context, k keeper.Keeper) (ValidatorUpdates []abci.ValidatorUpdate) {
+// Called every block, update validator set
+func EndBlocker(ctx sdk.Context, k keeper.Keeper) (validatorUpdates []abci.ValidatorUpdate) {
 	endBlockerTags := sdk.EmptyTags()
 
+	// Reset the intra-transaction counter.
+	k.SetIntraTxCounter(ctx, 0)
+
+	// Calculate validator set changes.
+	//
+	// NOTE: ApplyAndReturnValidatorSetUpdates has to come before
+	// UnbondAllMatureValidatorQueue.
+	// This fixes a bug when the unbonding period is instant (is the case in
+	// some of the tests). The test expected the validator to be completely
+	// unbonded after the Endblocker (go from Bonded -> Unbonding during
+	// ApplyAndReturnValidatorSetUpdates and then Unbonding -> Unbonded during
+	// UnbondAllMatureValidatorQueue).
+	validatorUpdates = k.ApplyAndReturnValidatorSetUpdates(ctx)
+
+	// Unbond all mature validators from the unbonding queue.
+	k.UnbondAllMatureValidatorQueue(ctx)
+
+	// Remove all mature unbonding delegations from the ubd queue.
 	matureUnbonds := k.DequeueAllMatureUnbondingQueue(ctx, ctx.BlockHeader().Time)
 	for _, dvPair := range matureUnbonds {
 		err := k.CompleteUnbonding(ctx, dvPair.DelegatorAddr, dvPair.ValidatorAddr)
@@ -48,6 +65,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) (ValidatorUpdates []abci.Valid
 		))
 	}
 
+	// Remove all mature redelegations from the red queue.
 	matureRedelegations := k.DequeueAllMatureRedelegationQueue(ctx, ctx.BlockHeader().Time)
 	for _, dvvTriplet := range matureRedelegations {
 		err := k.CompleteRedelegation(ctx, dvvTriplet.DelegatorAddr, dvvTriplet.ValidatorSrcAddr, dvvTriplet.ValidatorDstAddr)
@@ -61,23 +79,6 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) (ValidatorUpdates []abci.Valid
 			tags.DstValidator, []byte(dvvTriplet.ValidatorDstAddr.String()),
 		))
 	}
-
-	pool := k.GetPool(ctx)
-
-	// Process provision inflation
-	blockTime := ctx.BlockHeader().Time
-	if blockTime.Sub(pool.InflationLastTime) >= time.Hour {
-		params := k.GetParams(ctx)
-		pool.InflationLastTime = blockTime
-		pool = pool.ProcessProvisions(params)
-		k.SetPool(ctx, pool)
-	}
-
-	// reset the intra-transaction counter
-	k.SetIntraTxCounter(ctx, 0)
-
-	// calculate validator set changes
-	ValidatorUpdates = k.ApplyAndReturnValidatorSetUpdates(ctx)
 	return
 }
 
@@ -104,7 +105,7 @@ func handleMsgCreateValidator(ctx sdk.Context, msg types.MsgCreateValidator, k k
 
 	validator := NewValidator(msg.ValidatorAddr, msg.PubKey, msg.Description)
 	commission := NewCommissionWithTime(
-		msg.Commission.Rate, msg.Commission.MaxChangeRate,
+		msg.Commission.Rate, msg.Commission.MaxRate,
 		msg.Commission.MaxChangeRate, ctx.BlockHeader().Time,
 	)
 	validator, err := validator.SetInitialCommission(commission)
@@ -116,16 +117,14 @@ func handleMsgCreateValidator(ctx sdk.Context, msg types.MsgCreateValidator, k k
 	k.SetValidatorByConsAddr(ctx, validator)
 	k.SetNewValidatorByPowerIndex(ctx, validator)
 
+	k.OnValidatorCreated(ctx, validator.OperatorAddr)
+
 	// move coins from the msg.Address account to a (self-delegation) delegator account
 	// the validator account and global shares are updated within here
 	_, err = k.Delegate(ctx, msg.DelegatorAddr, msg.Delegation, validator, true)
 	if err != nil {
 		return err.Result()
 	}
-
-	k.OnValidatorCreated(ctx, validator.OperatorAddr)
-	accAddr := sdk.AccAddress(validator.OperatorAddr)
-	k.OnDelegationCreated(ctx, accAddr, validator.OperatorAddr)
 
 	tags := sdk.NewTags(
 		tags.Action, tags.ActionCreateValidator,
@@ -160,6 +159,7 @@ func handleMsgEditValidator(ctx sdk.Context, msg types.MsgEditValidator, k keepe
 			return err.Result()
 		}
 		validator.Commission = commission
+		k.OnValidatorModified(ctx, msg.ValidatorAddr)
 	}
 
 	k.SetValidator(ctx, validator)
@@ -195,9 +195,6 @@ func handleMsgDelegate(ctx sdk.Context, msg types.MsgDelegate, k keeper.Keeper) 
 		return err.Result()
 	}
 
-	// call the hook if present
-	k.OnDelegationCreated(ctx, msg.DelegatorAddr, validator.OperatorAddr)
-
 	tags := sdk.NewTags(
 		tags.Action, tags.ActionDelegate,
 		tags.Delegator, []byte(msg.DelegatorAddr.String()),
@@ -215,7 +212,7 @@ func handleMsgBeginUnbonding(ctx sdk.Context, msg types.MsgBeginUnbonding, k kee
 		return err.Result()
 	}
 
-	finishTime := types.MsgCdc.MustMarshalBinary(ubd.MinTime)
+	finishTime := types.MsgCdc.MustMarshalBinaryLengthPrefixed(ubd.MinTime)
 
 	tags := sdk.NewTags(
 		tags.Action, tags.ActionBeginUnbonding,
@@ -233,7 +230,7 @@ func handleMsgBeginRedelegate(ctx sdk.Context, msg types.MsgBeginRedelegate, k k
 		return err.Result()
 	}
 
-	finishTime := types.MsgCdc.MustMarshalBinary(red.MinTime)
+	finishTime := types.MsgCdc.MustMarshalBinaryLengthPrefixed(red.MinTime)
 
 	tags := sdk.NewTags(
 		tags.Action, tags.ActionBeginRedelegation,

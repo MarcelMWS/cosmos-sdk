@@ -3,31 +3,15 @@ package stake
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+	abci "github.com/tendermint/tendermint/abci/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/mock"
 	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/stretchr/testify/require"
-	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/crypto/ed25519"
-)
-
-var (
-	priv1 = ed25519.GenPrivKey()
-	addr1 = sdk.AccAddress(priv1.PubKey().Address())
-	priv2 = ed25519.GenPrivKey()
-	addr2 = sdk.AccAddress(priv2.PubKey().Address())
-	addr3 = sdk.AccAddress(ed25519.GenPrivKey().PubKey().Address())
-	priv4 = ed25519.GenPrivKey()
-	addr4 = sdk.AccAddress(priv4.PubKey().Address())
-	coins = sdk.Coins{sdk.NewCoin("foocoin", sdk.NewInt(10))}
-	fee   = auth.NewStdFee(
-		100000,
-		sdk.Coins{sdk.NewCoin("foocoin", sdk.NewInt(0))}...,
-	)
-
-	commissionMsg = NewCommissionMsg(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec())
+	stakeTypes "github.com/cosmos/cosmos-sdk/x/stake/types"
 )
 
 // getMockApp returns an initialized mock application for this module.
@@ -42,7 +26,7 @@ func getMockApp(t *testing.T) (*mock.App, Keeper) {
 	keyParams := sdk.NewKVStoreKey("params")
 	tkeyParams := sdk.NewTransientStoreKey("transient_params")
 
-	bankKeeper := bank.NewBaseKeeper(mApp.AccountMapper)
+	bankKeeper := bank.NewBaseKeeper(mApp.AccountKeeper)
 	pk := params.NewKeeper(mApp.Cdc, keyParams, tkeyParams)
 
 	keeper := NewKeeper(mApp.Cdc, keyStake, tkeyStake, bankKeeper, pk.Subspace(DefaultParamspace), mApp.RegisterCodespace(DefaultCodespace))
@@ -118,8 +102,8 @@ func checkDelegation(
 func TestStakeMsgs(t *testing.T) {
 	mApp, keeper := getMockApp(t)
 
-	genCoin := sdk.NewInt64Coin("steak", 42)
-	bondCoin := sdk.NewInt64Coin("steak", 10)
+	genCoin := sdk.NewInt64Coin(stakeTypes.DefaultBondDenom, 42)
+	bondCoin := sdk.NewInt64Coin(stakeTypes.DefaultBondDenom, 10)
 
 	acc1 := &auth.BaseAccount{
 		Address: addr1,
@@ -155,7 +139,7 @@ func TestStakeMsgs(t *testing.T) {
 		addr1, sdk.ValAddress(addr2), priv2.PubKey(), bondCoin, description, commissionMsg,
 	)
 
-	mock.SignCheckDeliver(t, mApp.BaseApp, []sdk.Msg{createValidatorMsgOnBehalfOf}, []int64{0, 1}, []int64{1, 0}, true, true, priv1, priv2)
+	mock.SignCheckDeliver(t, mApp.BaseApp, []sdk.Msg{createValidatorMsgOnBehalfOf}, []int64{0, 0}, []int64{1, 0}, true, true, priv1, priv2)
 	mock.CheckBalance(t, mApp, addr1, sdk.Coins{genCoin.Minus(bondCoin).Minus(bondCoin)})
 	mApp.BeginBlock(abci.RequestBeginBlock{})
 
@@ -179,13 +163,13 @@ func TestStakeMsgs(t *testing.T) {
 	mock.CheckBalance(t, mApp, addr2, sdk.Coins{genCoin})
 	delegateMsg := NewMsgDelegate(addr2, sdk.ValAddress(addr1), bondCoin)
 
-	mock.SignCheckDeliver(t, mApp.BaseApp, []sdk.Msg{delegateMsg}, []int64{1}, []int64{1}, true, true, priv2)
+	mock.SignCheckDeliver(t, mApp.BaseApp, []sdk.Msg{delegateMsg}, []int64{0}, []int64{1}, true, true, priv2)
 	mock.CheckBalance(t, mApp, addr2, sdk.Coins{genCoin.Minus(bondCoin)})
 	checkDelegation(t, mApp, keeper, addr2, sdk.ValAddress(addr1), true, sdk.NewDec(10))
 
 	// begin unbonding
 	beginUnbondingMsg := NewMsgBeginUnbonding(addr2, sdk.ValAddress(addr1), sdk.NewDec(10))
-	mock.SignCheckDeliver(t, mApp.BaseApp, []sdk.Msg{beginUnbondingMsg}, []int64{1}, []int64{2}, true, true, priv2)
+	mock.SignCheckDeliver(t, mApp.BaseApp, []sdk.Msg{beginUnbondingMsg}, []int64{0}, []int64{2}, true, true, priv2)
 
 	// delegation should exist anymore
 	checkDelegation(t, mApp, keeper, addr2, sdk.ValAddress(addr1), false, sdk.Dec{})

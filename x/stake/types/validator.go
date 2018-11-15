@@ -87,7 +87,7 @@ func MustMarshalValidator(cdc *codec.Codec, validator Validator) []byte {
 		UnbondingMinTime:   validator.UnbondingMinTime,
 		Commission:         validator.Commission,
 	}
-	return cdc.MustMarshalBinary(val)
+	return cdc.MustMarshalBinaryLengthPrefixed(val)
 }
 
 // unmarshal a redelegation from a store key and value
@@ -106,7 +106,7 @@ func UnmarshalValidator(cdc *codec.Codec, operatorAddr, value []byte) (validator
 		return
 	}
 	var storeValue validatorValue
-	err = cdc.UnmarshalBinary(value, &storeValue)
+	err = cdc.UnmarshalBinaryLengthPrefixed(value, &storeValue)
 	if err != nil {
 		return
 	}
@@ -314,12 +314,6 @@ func (v Validator) ABCIValidatorUpdate() abci.ValidatorUpdate {
 	}
 }
 
-// ABCIValidatorPowerBytes
-func (v Validator) ABCIValidatorPowerBytes(cdc *codec.Codec) []byte {
-	power := v.BondedTokens().RoundInt64()
-	return cdc.MustMarshalBinary(power)
-}
-
 // ABCIValidatorUpdateZero returns an abci.ValidatorUpdate from a staked validator type
 // with zero power used for validator updates.
 func (v Validator) ABCIValidatorUpdateZero() abci.ValidatorUpdate {
@@ -398,6 +392,9 @@ func (v Validator) AddTokensFromDel(pool Pool, amount sdk.Int) (Validator, Pool,
 		pool = pool.looseTokensToBonded(amountDec)
 	}
 
+	if exRate.IsZero() {
+		panic("zero exRate should not happen")
+	}
 	v.Tokens = v.Tokens.Add(amountDec)
 	issuedShares := amountDec.Quo(exRate)
 	v.DelegatorShares = v.DelegatorShares.Add(issuedShares)
@@ -433,21 +430,6 @@ func (v Validator) BondedTokens() sdk.Dec {
 		return v.Tokens
 	}
 	return sdk.ZeroDec()
-}
-
-// TODO remove this once the validator queue logic is implemented
-// Returns if the validator should be considered unbonded
-func (v Validator) IsUnbonded(ctx sdk.Context) bool {
-	switch v.Status {
-	case sdk.Unbonded:
-		return true
-	case sdk.Unbonding:
-		ctxTime := ctx.BlockHeader().Time
-		if ctxTime.After(v.UnbondingMinTime) {
-			return true
-		}
-	}
-	return false
 }
 
 //______________________________________________________________________

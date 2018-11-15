@@ -107,7 +107,8 @@ func PrintUnsignedStdTx(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, msg
 
 // SignStdTx appends a signature to a StdTx and returns a copy of a it. If appendSig
 // is false, it replaces the signatures already attached with the new signature.
-func SignStdTx(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, name string, stdTx auth.StdTx, appendSig bool) (auth.StdTx, error) {
+// Don't perform online validation or lookups if offline is true.
+func SignStdTx(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, name string, stdTx auth.StdTx, appendSig bool, offline bool) (auth.StdTx, error) {
 	var signedStdTx auth.StdTx
 
 	keybase, err := keys.GetKeyBase()
@@ -122,10 +123,11 @@ func SignStdTx(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, name string,
 
 	// Check whether the address is a signer
 	if !isTxSigner(sdk.AccAddress(addr), stdTx.GetSigners()) {
-		fmt.Fprintf(os.Stderr, "WARNING: The generated transaction's intended signer does not match the given signer: '%v'", name)
+		return signedStdTx, fmt.Errorf(
+			"The generated transaction's intended signer does not match the given signer: %q", name)
 	}
 
-	if txBldr.AccountNumber == 0 {
+	if !offline && txBldr.AccountNumber == 0 {
 		accNum, err := cliCtx.GetAccountNumber(addr)
 		if err != nil {
 			return signedStdTx, err
@@ -133,7 +135,7 @@ func SignStdTx(txBldr authtxb.TxBuilder, cliCtx context.CLIContext, name string,
 		txBldr = txBldr.WithAccountNumber(accNum)
 	}
 
-	if txBldr.Sequence == 0 {
+	if !offline && txBldr.Sequence == 0 {
 		accSeq, err := cliCtx.GetAccountSequence(addr)
 		if err != nil {
 			return signedStdTx, err
@@ -165,7 +167,7 @@ func adjustGasEstimate(estimate int64, adjustment float64) int64 {
 
 func parseQueryResponse(cdc *amino.Codec, rawRes []byte) (int64, error) {
 	var simulationResult sdk.Result
-	if err := cdc.UnmarshalBinary(rawRes, &simulationResult); err != nil {
+	if err := cdc.UnmarshalBinaryLengthPrefixed(rawRes, &simulationResult); err != nil {
 		return 0, err
 	}
 	return simulationResult.GasUsed, nil

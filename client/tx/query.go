@@ -3,8 +3,9 @@ package tx
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/tendermint/tendermint/libs/common"
 	"net/http"
+
+	"github.com/tendermint/tendermint/libs/common"
 
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
@@ -124,7 +125,7 @@ type Info struct {
 func parseTx(cdc *codec.Codec, txBytes []byte) (sdk.Tx, error) {
 	var tx auth.StdTx
 
-	err := cdc.UnmarshalBinary(txBytes, &tx)
+	err := cdc.UnmarshalBinaryLengthPrefixed(txBytes, &tx)
 	if err != nil {
 		return nil, err
 	}
@@ -142,8 +143,7 @@ func QueryTxRequestHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.H
 
 		output, err := queryTx(cdc, cliCtx, hashHexStr)
 		if err != nil {
-			w.WriteHeader(500)
-			w.Write([]byte(err.Error()))
+			utils.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 		utils.PostProcessResponse(w, cdc, output, cliCtx.Indent)

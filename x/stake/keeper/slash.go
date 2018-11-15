@@ -46,11 +46,12 @@ func (k Keeper) Slash(ctx sdk.Context, consAddr sdk.ConsAddress, infractionHeigh
 	}
 
 	// should not be slashing unbonded
-	if validator.IsUnbonded(ctx) {
+	if validator.Status == sdk.Unbonded {
 		panic(fmt.Sprintf("should not be slashing unbonded validator: %s", validator.GetOperator()))
 	}
 
 	operatorAddress := validator.GetOperator()
+	k.OnValidatorModified(ctx, operatorAddress)
 
 	// Track remaining slash amount for the validator
 	// This will decrease when we slash unbondings and
@@ -97,18 +98,15 @@ func (k Keeper) Slash(ctx sdk.Context, consAddr sdk.ConsAddress, infractionHeigh
 
 	// cannot decrease balance below zero
 	tokensToBurn := sdk.MinDec(remainingSlashAmount, validator.Tokens)
+	tokensToBurn = sdk.MaxDec(tokensToBurn, sdk.ZeroDec()) // defensive.
 
-	// burn validator's tokens and update the validator
+	// Deduct from validator's bonded tokens and update the validator.
+	// The deducted tokens are returned to pool.LooseTokens.
 	validator = k.RemoveValidatorTokens(ctx, validator, tokensToBurn)
 	pool := k.GetPool(ctx)
+	// Burn the slashed tokens, which are now loose.
 	pool.LooseTokens = pool.LooseTokens.Sub(tokensToBurn)
 	k.SetPool(ctx, pool)
-
-	// remove validator if it has no more tokens
-	if validator.Tokens.IsZero() && validator.Status != sdk.Bonded {
-		// if bonded, we must remove in ApplyAndReturnValidatorSetUpdates instead
-		k.RemoveValidator(ctx, validator.OperatorAddr)
-	}
 
 	// Log that a slash occurred!
 	logger.Info(fmt.Sprintf(
@@ -177,7 +175,7 @@ func (k Keeper) slashUnbondingDelegation(ctx sdk.Context, unbondingDelegation ty
 
 		// Burn loose tokens
 		// Ref https://github.com/cosmos/cosmos-sdk/pull/1278#discussion_r198657760
-		pool.LooseTokens = pool.LooseTokens.Sub(slashAmount)
+		pool.LooseTokens = pool.LooseTokens.Sub(sdk.NewDecFromInt(unbondingSlashAmount))
 		k.SetPool(ctx, pool)
 	}
 
@@ -232,6 +230,7 @@ func (k Keeper) slashRedelegation(ctx sdk.Context, validator types.Validator, re
 		if sharesToUnbond.GT(delegation.Shares) {
 			sharesToUnbond = delegation.Shares
 		}
+
 		tokensToBurn, err := k.unbond(ctx, redelegation.DelegatorAddr, redelegation.ValidatorDstAddr, sharesToUnbond)
 		if err != nil {
 			panic(fmt.Errorf("error unbonding delegator: %v", err))

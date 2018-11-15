@@ -6,11 +6,16 @@ import (
 	"os"
 	"strings"
 
-	"github.com/cosmos/cosmos-sdk/crypto"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/bip39"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/hd"
-	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/pkg/errors"
+
+	"github.com/cosmos/go-bip39"
+
+	"github.com/cosmos/cosmos-sdk/crypto"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/hd"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/mintkey"
+	"github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/cosmos/cosmos-sdk/crypto/keys/keyerror"
 	tmcrypto "github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/encoding/amino"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
@@ -44,6 +49,14 @@ const (
 	Italian
 	addressSuffix = "address"
 	infoSuffix    = "info"
+)
+
+const (
+	// used for deriving seed from mnemonic
+	defaultBIP39Passphrase = ""
+
+	// bits of entropy to draw when creating a mnemonic
+	defaultEntropySize = 256
 )
 
 var (
@@ -85,12 +98,17 @@ func (kb dbKeybase) CreateMnemonic(name string, language Language, passwd string
 	}
 
 	// default number of words (24):
-	mnemonicS, err := bip39.NewMnemonic(bip39.FreshKey)
+	// this generates a mnemonic directly from the number of words by reading system entropy.
+	entropy, err := bip39.NewEntropy(defaultEntropySize)
 	if err != nil {
 		return
 	}
-	mnemonic = strings.Join(mnemonicS, " ")
-	seed := bip39.MnemonicToSeed(mnemonic)
+	mnemonic, err = bip39.NewMnemonic(entropy)
+	if err != nil {
+		return
+	}
+
+	seed := bip39.NewSeed(mnemonic, defaultBIP39Passphrase)
 	info, err = kb.persistDerivedKey(seed, passwd, name, hd.FullFundraiserPath)
 	return
 }
@@ -102,7 +120,7 @@ func (kb dbKeybase) CreateKey(name, mnemonic, passwd string) (info Info, err err
 		err = fmt.Errorf("recovering only works with 12 word (fundraiser) or 24 word mnemonics, got: %v words", len(words))
 		return
 	}
-	seed, err := bip39.MnemonicToSeedWithErrChecking(mnemonic)
+	seed, err := bip39.NewSeedWithErrorChecking(mnemonic, defaultBIP39Passphrase)
 	if err != nil {
 		return
 	}
@@ -119,7 +137,7 @@ func (kb dbKeybase) CreateFundraiserKey(name, mnemonic, passwd string) (info Inf
 		err = fmt.Errorf("recovering only works with 12 word (fundraiser), got: %v words", len(words))
 		return
 	}
-	seed, err := bip39.MnemonicToSeedWithErrChecking(mnemonic)
+	seed, err := bip39.NewSeedWithErrorChecking(mnemonic, defaultBIP39Passphrase)
 	if err != nil {
 		return
 	}
@@ -127,12 +145,12 @@ func (kb dbKeybase) CreateFundraiserKey(name, mnemonic, passwd string) (info Inf
 	return
 }
 
-func (kb dbKeybase) Derive(name, mnemonic, passwd string, params hd.BIP44Params) (info Info, err error) {
-	seed, err := bip39.MnemonicToSeedWithErrChecking(mnemonic)
+func (kb dbKeybase) Derive(name, mnemonic, bip39Passphrase, encryptPasswd string, params hd.BIP44Params) (info Info, err error) {
+	seed, err := bip39.NewSeedWithErrorChecking(mnemonic, bip39Passphrase)
 	if err != nil {
 		return
 	}
-	info, err = kb.persistDerivedKey(seed, passwd, name, params.String())
+	info, err = kb.persistDerivedKey(seed, encryptPasswd, name, params.String())
 
 	return
 }
@@ -200,7 +218,7 @@ func (kb dbKeybase) List() ([]Info, error) {
 func (kb dbKeybase) Get(name string) (Info, error) {
 	bs := kb.db.Get(infoKey(name))
 	if len(bs) == 0 {
-		return nil, fmt.Errorf("Key %s not found", name)
+		return nil, keyerror.NewErrKeyNotFound(name)
 	}
 	return readInfo(bs)
 }
@@ -229,7 +247,7 @@ func (kb dbKeybase) Sign(name, passphrase string, msg []byte) (sig []byte, pub t
 			err = fmt.Errorf("private key not available")
 			return
 		}
-		priv, err = unarmorDecryptPrivKey(linfo.PrivKeyArmor, passphrase)
+		priv, err = mintkey.UnarmorDecryptPrivKey(linfo.PrivKeyArmor, passphrase)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -255,7 +273,7 @@ func (kb dbKeybase) Sign(name, passphrase string, msg []byte) (sig []byte, pub t
 		if err != nil {
 			return nil, nil, err
 		}
-		cdc.MustUnmarshalBinary([]byte(signed), sig)
+		cdc.MustUnmarshalBinaryLengthPrefixed([]byte(signed), sig)
 		return sig, linfo.GetPubKey(), nil
 	}
 	sig, err = priv.Sign(msg)
@@ -279,7 +297,7 @@ func (kb dbKeybase) ExportPrivateKeyObject(name string, passphrase string) (tmcr
 			err = fmt.Errorf("private key not available")
 			return nil, err
 		}
-		priv, err = unarmorDecryptPrivKey(linfo.PrivKeyArmor, passphrase)
+		priv, err = mintkey.UnarmorDecryptPrivKey(linfo.PrivKeyArmor, passphrase)
 		if err != nil {
 			return nil, err
 		}
@@ -296,7 +314,7 @@ func (kb dbKeybase) Export(name string) (armor string, err error) {
 	if bz == nil {
 		return "", fmt.Errorf("no key to export with name %s", name)
 	}
-	return armorInfoBytes(bz), nil
+	return mintkey.ArmorInfoBytes(bz), nil
 }
 
 // ExportPubKey returns public keys in ASCII armored format.
@@ -311,7 +329,7 @@ func (kb dbKeybase) ExportPubKey(name string) (armor string, err error) {
 	if err != nil {
 		return
 	}
-	return armorPubKeyBytes(info.GetPubKey().Bytes()), nil
+	return mintkey.ArmorPubKeyBytes(info.GetPubKey().Bytes()), nil
 }
 
 func (kb dbKeybase) Import(name string, armor string) (err error) {
@@ -319,7 +337,7 @@ func (kb dbKeybase) Import(name string, armor string) (err error) {
 	if len(bz) > 0 {
 		return errors.New("Cannot overwrite data for name " + name)
 	}
-	infoBytes, err := unarmorInfoBytes(armor)
+	infoBytes, err := mintkey.UnarmorInfoBytes(armor)
 	if err != nil {
 		return
 	}
@@ -335,7 +353,7 @@ func (kb dbKeybase) ImportPubKey(name string, armor string) (err error) {
 	if len(bz) > 0 {
 		return errors.New("Cannot overwrite data for name " + name)
 	}
-	pubBytes, err := unarmorPubKeyBytes(armor)
+	pubBytes, err := mintkey.UnarmorPubKeyBytes(armor)
 	if err != nil {
 		return
 	}
@@ -360,7 +378,7 @@ func (kb dbKeybase) Delete(name, passphrase string) error {
 	switch info.(type) {
 	case localInfo:
 		linfo := info.(localInfo)
-		_, err = unarmorDecryptPrivKey(linfo.PrivKeyArmor, passphrase)
+		_, err = mintkey.UnarmorDecryptPrivKey(linfo.PrivKeyArmor, passphrase)
 		if err != nil {
 			return err
 		}
@@ -394,7 +412,7 @@ func (kb dbKeybase) Update(name, oldpass string, getNewpass func() (string, erro
 	switch info.(type) {
 	case localInfo:
 		linfo := info.(localInfo)
-		key, err := unarmorDecryptPrivKey(linfo.PrivKeyArmor, oldpass)
+		key, err := mintkey.UnarmorDecryptPrivKey(linfo.PrivKeyArmor, oldpass)
 		if err != nil {
 			return err
 		}
@@ -409,9 +427,14 @@ func (kb dbKeybase) Update(name, oldpass string, getNewpass func() (string, erro
 	}
 }
 
+// CloseDB releases the lock and closes the storage backend.
+func (kb dbKeybase) CloseDB() {
+	kb.db.Close()
+}
+
 func (kb dbKeybase) writeLocalKey(priv tmcrypto.PrivKey, name, passphrase string) Info {
 	// encrypt private key using passphrase
-	privArmor := encryptArmorPrivKey(priv, passphrase)
+	privArmor := mintkey.EncryptArmorPrivKey(priv, passphrase)
 	// make Info
 	pub := priv.PubKey()
 	info := newLocalInfo(name, pub, privArmor)

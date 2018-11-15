@@ -1,9 +1,11 @@
 package mock
 
 import (
+	"bytes"
 	"fmt"
 	"math/rand"
 	"os"
+	"sort"
 
 	bam "github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -29,7 +31,7 @@ type App struct {
 	KeyAccount *sdk.KVStoreKey
 
 	// TODO: Abstract this out from not needing to be auth specifically
-	AccountMapper       auth.AccountMapper
+	AccountKeeper       auth.AccountKeeper
 	FeeCollectionKeeper auth.FeeCollectionKeeper
 
 	GenesisAccounts  []auth.Account
@@ -57,8 +59,8 @@ func NewApp() *App {
 		TotalCoinsSupply: sdk.Coins{},
 	}
 
-	// Define the accountMapper
-	app.AccountMapper = auth.NewAccountMapper(
+	// Define the accountKeeper
+	app.AccountKeeper = auth.NewAccountKeeper(
 		app.Cdc,
 		app.KeyAccount,
 		auth.ProtoBaseAccount,
@@ -67,7 +69,7 @@ func NewApp() *App {
 	// Initialize the app. The chainers and blockers can be overwritten before
 	// calling complete setup.
 	app.SetInitChainer(app.InitChainer)
-	app.SetAnteHandler(auth.NewAnteHandler(app.AccountMapper, app.FeeCollectionKeeper))
+	app.SetAnteHandler(auth.NewAnteHandler(app.AccountKeeper, app.FeeCollectionKeeper))
 
 	// Not sealing for custom extension
 
@@ -101,31 +103,72 @@ func (app *App) CompleteSetup(newKeys ...sdk.StoreKey) error {
 func (app *App) InitChainer(ctx sdk.Context, _ abci.RequestInitChain) abci.ResponseInitChain {
 	// Load the genesis accounts
 	for _, genacc := range app.GenesisAccounts {
-		acc := app.AccountMapper.NewAccountWithAddress(ctx, genacc.GetAddress())
+		acc := app.AccountKeeper.NewAccountWithAddress(ctx, genacc.GetAddress())
 		acc.SetCoins(genacc.GetCoins())
-		app.AccountMapper.SetAccount(ctx, acc)
+		app.AccountKeeper.SetAccount(ctx, acc)
 	}
 
 	return abci.ResponseInitChain{}
 }
 
+// Type that combines an Address with the privKey and pubKey to that address
+type AddrKeys struct {
+	Address sdk.AccAddress
+	PubKey  crypto.PubKey
+	PrivKey crypto.PrivKey
+}
+
+// implement `Interface` in sort package.
+type AddrKeysSlice []AddrKeys
+
+func (b AddrKeysSlice) Len() int {
+	return len(b)
+}
+
+// Sorts lexographically by Address
+func (b AddrKeysSlice) Less(i, j int) bool {
+	// bytes package already implements Comparable for []byte.
+	switch bytes.Compare(b[i].Address.Bytes(), b[j].Address.Bytes()) {
+	case -1:
+		return true
+	case 0, 1:
+		return false
+	default:
+		panic("not fail-able with `bytes.Comparable` bounded [-1, 1].")
+	}
+}
+
+func (b AddrKeysSlice) Swap(i, j int) {
+	b[j], b[i] = b[i], b[j]
+}
+
 // CreateGenAccounts generates genesis accounts loaded with coins, and returns
 // their addresses, pubkeys, and privkeys.
 func CreateGenAccounts(numAccs int, genCoins sdk.Coins) (genAccs []auth.Account, addrs []sdk.AccAddress, pubKeys []crypto.PubKey, privKeys []crypto.PrivKey) {
+	addrKeysSlice := AddrKeysSlice{}
+
 	for i := 0; i < numAccs; i++ {
 		privKey := ed25519.GenPrivKey()
 		pubKey := privKey.PubKey()
 		addr := sdk.AccAddress(pubKey.Address())
 
-		genAcc := &auth.BaseAccount{
+		addrKeysSlice = append(addrKeysSlice, AddrKeys{
 			Address: addr,
-			Coins:   genCoins,
-		}
+			PubKey:  pubKey,
+			PrivKey: privKey,
+		})
+	}
 
-		genAccs = append(genAccs, genAcc)
-		privKeys = append(privKeys, privKey)
-		pubKeys = append(pubKeys, pubKey)
-		addrs = append(addrs, addr)
+	sort.Sort(addrKeysSlice)
+
+	for i := range addrKeysSlice {
+		addrs = append(addrs, addrKeysSlice[i].Address)
+		pubKeys = append(pubKeys, addrKeysSlice[i].PubKey)
+		privKeys = append(privKeys, addrKeysSlice[i].PrivKey)
+		genAccs = append(genAccs, &auth.BaseAccount{
+			Address: addrKeysSlice[i].Address,
+			Coins:   genCoins,
+		})
 	}
 
 	return
@@ -247,8 +290,8 @@ func RandomSetGenesis(r *rand.Rand, app *App, addrs []sdk.AccAddress, denoms []s
 	app.GenesisAccounts = accts
 }
 
-// GetAllAccounts returns all accounts in the accountMapper.
-func GetAllAccounts(mapper auth.AccountMapper, ctx sdk.Context) []auth.Account {
+// GetAllAccounts returns all accounts in the accountKeeper.
+func GetAllAccounts(mapper auth.AccountKeeper, ctx sdk.Context) []auth.Account {
 	accounts := []auth.Account{}
 	appendAccount := func(acc auth.Account) (stop bool) {
 		accounts = append(accounts, acc)

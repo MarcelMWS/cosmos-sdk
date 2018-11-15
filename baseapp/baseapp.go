@@ -337,7 +337,7 @@ func handleQueryApp(app *BaseApp, path []string, req abci.RequestQuery) (res abc
 		}
 
 		// Encode with json
-		value := codec.Cdc.MustMarshalBinary(result)
+		value := codec.Cdc.MustMarshalBinaryLengthPrefixed(result)
 		return abci.ResponseQuery{
 			Code:  uint32(sdk.ABCICodeOK),
 			Value: value,
@@ -394,6 +394,7 @@ func handleQueryCustom(app *BaseApp, path []string, req abci.RequestQuery) (res 
 
 	ctx := sdk.NewContext(app.cms.CacheMultiStore(), app.checkState.ctx.BlockHeader(), true, app.Logger).
 		WithMinimumFees(app.minimumFees)
+
 	// Passes the rest of the path as an argument to the querier.
 	// For example, in the path "custom/gov/proposal/test", the gov querier gets []string{"proposal", "test"} as the path
 	resBytes, err := querier(ctx, path[2:], req)
@@ -528,10 +529,10 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 	var code sdk.ABCICodeType
 	for msgIdx, msg := range msgs {
 		// Match route.
-		msgType := msg.Type()
-		handler := app.router.Route(msgType)
+		msgRoute := msg.Route()
+		handler := app.router.Route(msgRoute)
 		if handler == nil {
-			return sdk.ErrUnknownRequest("Unrecognized Msg type: " + msgType).Result()
+			return sdk.ErrUnknownRequest("Unrecognized Msg type: " + msgRoute).Result()
 		}
 
 		var msgResult sdk.Result
@@ -539,7 +540,7 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 		if mode != runTxModeCheck {
 			msgResult = handler(ctx, msg)
 		}
-		msgResult.Tags = append(msgResult.Tags, sdk.MakeTag("action", []byte(msg.Name())))
+		msgResult.Tags = append(msgResult.Tags, sdk.MakeTag("action", []byte(msg.Type())))
 
 		// NOTE: GasWanted is determined by ante handler and
 		// GasUsed by the GasMeter

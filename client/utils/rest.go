@@ -1,6 +1,5 @@
 package utils
 
-import "C"
 import (
 	"fmt"
 	"io/ioutil"
@@ -12,6 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/keyerror"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
@@ -27,12 +27,12 @@ const (
 
 // WriteErrorResponse prepares and writes a HTTP error
 // given a status code and an error message.
-func WriteErrorResponse(w http.ResponseWriter, status int, msg string) {
+func WriteErrorResponse(w http.ResponseWriter, status int, err string) {
 	w.WriteHeader(status)
-	w.Write([]byte(msg))
+	w.Write([]byte(err))
 }
 
-// WriteGasEstimateResponse prepares and writes an HTTP
+// WriteSimulationResponse prepares and writes an HTTP
 // response for transactions simulations.
 func WriteSimulationResponse(w http.ResponseWriter, gas int64) {
 	w.WriteHeader(http.StatusOK)
@@ -58,6 +58,20 @@ func ParseInt64OrReturnBadRequest(w http.ResponseWriter, s string) (n int64, ok 
 	n, err = strconv.ParseInt(s, 10, 64)
 	if err != nil {
 		err := fmt.Errorf("'%s' is not a valid int64", s)
+		WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+		return n, false
+	}
+
+	return n, true
+}
+
+// ParseUint64OrReturnBadRequest converts s to a uint64 value.
+func ParseUint64OrReturnBadRequest(w http.ResponseWriter, s string) (n uint64, ok bool) {
+	var err error
+
+	n, err = strconv.ParseUint(s, 10, 64)
+	if err != nil {
+		err := fmt.Errorf("'%s' is not a valid uint64", s)
 		WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 		return n, false
 	}
@@ -230,8 +244,14 @@ func CompleteAndBroadcastTxREST(w http.ResponseWriter, r *http.Request, cliCtx c
 	}
 
 	txBytes, err := txBldr.BuildAndSign(baseReq.Name, baseReq.Password, msgs)
-	if err != nil {
+	if keyerror.IsErrKeyNotFound(err) {
+		WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	} else if keyerror.IsErrWrongPassword(err) {
 		WriteErrorResponse(w, http.StatusUnauthorized, err.Error())
+		return
+	} else if err != nil {
+		WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 

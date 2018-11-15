@@ -290,8 +290,8 @@ type txTest struct {
 func (tx txTest) GetMsgs() []sdk.Msg { return tx.Msgs }
 
 const (
-	typeMsgCounter  = "msgCounter"
-	typeMsgCounter2 = "msgCounter2"
+	routeMsgCounter  = "msgCounter"
+	routeMsgCounter2 = "msgCounter2"
 )
 
 // ValidateBasic() fails on negative counters.
@@ -301,8 +301,8 @@ type msgCounter struct {
 }
 
 // Implements Msg
-func (msg msgCounter) Type() string                 { return typeMsgCounter }
-func (msg msgCounter) Name() string                 { return "counter1" }
+func (msg msgCounter) Route() string                { return routeMsgCounter }
+func (msg msgCounter) Type() string                 { return "counter1" }
 func (msg msgCounter) GetSignBytes() []byte         { return nil }
 func (msg msgCounter) GetSigners() []sdk.AccAddress { return nil }
 func (msg msgCounter) ValidateBasic() sdk.Error {
@@ -325,14 +325,14 @@ type msgNoRoute struct {
 	msgCounter
 }
 
-func (tx msgNoRoute) Type() string { return "noroute" }
+func (tx msgNoRoute) Route() string { return "noroute" }
 
 // a msg we dont know how to decode
 type msgNoDecode struct {
 	msgCounter
 }
 
-func (tx msgNoDecode) Type() string { return typeMsgCounter }
+func (tx msgNoDecode) Route() string { return routeMsgCounter }
 
 // Another counter msg. Duplicate of msgCounter
 type msgCounter2 struct {
@@ -340,8 +340,8 @@ type msgCounter2 struct {
 }
 
 // Implements Msg
-func (msg msgCounter2) Type() string                 { return typeMsgCounter2 }
-func (msg msgCounter2) Name() string                 { return "counter2" }
+func (msg msgCounter2) Route() string                { return routeMsgCounter2 }
+func (msg msgCounter2) Type() string                 { return "counter2" }
 func (msg msgCounter2) GetSignBytes() []byte         { return nil }
 func (msg msgCounter2) GetSigners() []sdk.AccAddress { return nil }
 func (msg msgCounter2) ValidateBasic() sdk.Error {
@@ -358,7 +358,7 @@ func testTxDecoder(cdc *codec.Codec) sdk.TxDecoder {
 		if len(txBytes) == 0 {
 			return nil, sdk.ErrTxDecode("txBytes are empty")
 		}
-		err := cdc.UnmarshalBinary(txBytes, &tx)
+		err := cdc.UnmarshalBinaryLengthPrefixed(txBytes, &tx)
 		if err != nil {
 			return nil, sdk.ErrTxDecode("").TraceSDK(err.Error())
 		}
@@ -440,7 +440,7 @@ func TestCheckTx(t *testing.T) {
 	anteOpt := func(bapp *BaseApp) { bapp.SetAnteHandler(anteHandlerTxTest(t, capKey1, counterKey)) }
 	routerOpt := func(bapp *BaseApp) {
 		// TODO: can remove this once CheckTx doesnt process msgs.
-		bapp.Router().AddRoute(typeMsgCounter, func(ctx sdk.Context, msg sdk.Msg) sdk.Result { return sdk.Result{} })
+		bapp.Router().AddRoute(routeMsgCounter, func(ctx sdk.Context, msg sdk.Msg) sdk.Result { return sdk.Result{} })
 	}
 
 	app := setupBaseApp(t, anteOpt, routerOpt)
@@ -455,7 +455,7 @@ func TestCheckTx(t *testing.T) {
 
 	for i := int64(0); i < nTxs; i++ {
 		tx := newTxCounter(i, 0)
-		txBytes, err := codec.MarshalBinary(tx)
+		txBytes, err := codec.MarshalBinaryLengthPrefixed(tx)
 		require.NoError(t, err)
 		r := app.CheckTx(txBytes)
 		assert.True(t, r.IsOK(), fmt.Sprintf("%v", r))
@@ -486,7 +486,9 @@ func TestDeliverTx(t *testing.T) {
 
 	// test increments in the handler
 	deliverKey := []byte("deliver-key")
-	routerOpt := func(bapp *BaseApp) { bapp.Router().AddRoute(typeMsgCounter, handlerMsgCounter(t, capKey1, deliverKey)) }
+	routerOpt := func(bapp *BaseApp) {
+		bapp.Router().AddRoute(routeMsgCounter, handlerMsgCounter(t, capKey1, deliverKey))
+	}
 
 	app := setupBaseApp(t, anteOpt, routerOpt)
 
@@ -501,7 +503,7 @@ func TestDeliverTx(t *testing.T) {
 		for i := 0; i < txPerHeight; i++ {
 			counter := int64(blockN*txPerHeight + i)
 			tx := newTxCounter(counter, counter)
-			txBytes, err := codec.MarshalBinary(tx)
+			txBytes, err := codec.MarshalBinaryLengthPrefixed(tx)
 			require.NoError(t, err)
 			res := app.DeliverTx(txBytes)
 			require.True(t, res.IsOK(), fmt.Sprintf("%v", res))
@@ -527,8 +529,8 @@ func TestMultiMsgDeliverTx(t *testing.T) {
 	deliverKey := []byte("deliver-key")
 	deliverKey2 := []byte("deliver-key2")
 	routerOpt := func(bapp *BaseApp) {
-		bapp.Router().AddRoute(typeMsgCounter, handlerMsgCounter(t, capKey1, deliverKey))
-		bapp.Router().AddRoute(typeMsgCounter2, handlerMsgCounter(t, capKey1, deliverKey2))
+		bapp.Router().AddRoute(routeMsgCounter, handlerMsgCounter(t, capKey1, deliverKey))
+		bapp.Router().AddRoute(routeMsgCounter2, handlerMsgCounter(t, capKey1, deliverKey2))
 	}
 
 	app := setupBaseApp(t, anteOpt, routerOpt)
@@ -538,11 +540,11 @@ func TestMultiMsgDeliverTx(t *testing.T) {
 	registerTestCodec(codec)
 
 	// run a multi-msg tx
-	// with all msgs the same type
+	// with all msgs the same route
 	{
 		app.BeginBlock(abci.RequestBeginBlock{})
 		tx := newTxCounter(0, 0, 1, 2)
-		txBytes, err := codec.MarshalBinary(tx)
+		txBytes, err := codec.MarshalBinaryLengthPrefixed(tx)
 		require.NoError(t, err)
 		res := app.DeliverTx(txBytes)
 		require.True(t, res.IsOK(), fmt.Sprintf("%v", res))
@@ -563,7 +565,7 @@ func TestMultiMsgDeliverTx(t *testing.T) {
 		tx := newTxCounter(1, 3)
 		tx.Msgs = append(tx.Msgs, msgCounter2{0})
 		tx.Msgs = append(tx.Msgs, msgCounter2{1})
-		txBytes, err := codec.MarshalBinary(tx)
+		txBytes, err := codec.MarshalBinaryLengthPrefixed(tx)
 		require.NoError(t, err)
 		res := app.DeliverTx(txBytes)
 		require.True(t, res.IsOK(), fmt.Sprintf("%v", res))
@@ -604,7 +606,7 @@ func TestSimulateTx(t *testing.T) {
 	}
 
 	routerOpt := func(bapp *BaseApp) {
-		bapp.Router().AddRoute(typeMsgCounter, func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
+		bapp.Router().AddRoute(routeMsgCounter, func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 			ctx.GasMeter().ConsumeGas(gasConsumed, "test")
 			return sdk.Result{GasUsed: ctx.GasMeter().GasConsumed()}
 		})
@@ -636,7 +638,7 @@ func TestSimulateTx(t *testing.T) {
 		require.Equal(t, gasConsumed, result.GasUsed)
 
 		// simulate by calling Query with encoded tx
-		txBytes, err := cdc.MarshalBinary(tx)
+		txBytes, err := cdc.MarshalBinaryLengthPrefixed(tx)
 		require.Nil(t, err)
 		query := abci.RequestQuery{
 			Path: "/app/simulate",
@@ -646,7 +648,7 @@ func TestSimulateTx(t *testing.T) {
 		require.True(t, queryResult.IsOK(), queryResult.Log)
 
 		var res sdk.Result
-		codec.Cdc.MustUnmarshalBinary(queryResult.Value, &res)
+		codec.Cdc.MustUnmarshalBinaryLengthPrefixed(queryResult.Value, &res)
 		require.Nil(t, err, "Result unmarshalling failed")
 		require.True(t, res.IsOK(), res.Log)
 		require.Equal(t, gasConsumed, res.GasUsed, res.Log)
@@ -666,7 +668,7 @@ func TestRunInvalidTransaction(t *testing.T) {
 		})
 	}
 	routerOpt := func(bapp *BaseApp) {
-		bapp.Router().AddRoute(typeMsgCounter, func(ctx sdk.Context, msg sdk.Msg) (res sdk.Result) { return })
+		bapp.Router().AddRoute(routeMsgCounter, func(ctx sdk.Context, msg sdk.Msg) (res sdk.Result) { return })
 	}
 
 	app := setupBaseApp(t, anteOpt, routerOpt)
@@ -727,7 +729,7 @@ func TestRunInvalidTransaction(t *testing.T) {
 		registerTestCodec(newCdc)
 		newCdc.RegisterConcrete(&msgNoDecode{}, "cosmos-sdk/baseapp/msgNoDecode", nil)
 
-		txBytes, err := newCdc.MarshalBinary(tx)
+		txBytes, err := newCdc.MarshalBinaryLengthPrefixed(tx)
 		require.NoError(t, err)
 		res := app.DeliverTx(txBytes)
 		require.EqualValues(t, sdk.ToABCICode(sdk.CodespaceRoot, sdk.CodeTxDecode), res.Code)
@@ -771,7 +773,7 @@ func TestTxGasLimits(t *testing.T) {
 	}
 
 	routerOpt := func(bapp *BaseApp) {
-		bapp.Router().AddRoute(typeMsgCounter, func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
+		bapp.Router().AddRoute(routeMsgCounter, func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
 			count := msg.(msgCounter).Counter
 			ctx.GasMeter().ConsumeGas(count, "counter-handler")
 			return sdk.Result{}

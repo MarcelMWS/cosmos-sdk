@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/ed25519"
@@ -23,7 +22,7 @@ const (
 // NewAnteHandler returns an AnteHandler that checks
 // and increments sequence numbers, checks signatures & account numbers,
 // and deducts fees from the first signer.
-func NewAnteHandler(am AccountMapper, fck FeeCollectionKeeper) sdk.AnteHandler {
+func NewAnteHandler(am AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 	return func(
 		ctx sdk.Context, tx sdk.Tx, simulate bool,
 	) (newCtx sdk.Context, res sdk.Result, abort bool) {
@@ -81,7 +80,7 @@ func NewAnteHandler(am AccountMapper, fck FeeCollectionKeeper) sdk.AnteHandler {
 		if !res.IsOK() {
 			return newCtx, res, true
 		}
-		res = validateAccNumAndSequence(signerAccs, stdSigs)
+		res = validateAccNumAndSequence(ctx, signerAccs, stdSigs)
 		if !res.IsOK() {
 			return newCtx, res, true
 		}
@@ -93,7 +92,7 @@ func NewAnteHandler(am AccountMapper, fck FeeCollectionKeeper) sdk.AnteHandler {
 			if !res.IsOK() {
 				return newCtx, res, true
 			}
-			fck.addCollectedFees(newCtx, stdTx.Fee.Amount)
+			fck.AddCollectedFees(newCtx, stdTx.Fee.Amount)
 		}
 
 		for i := 0; i < len(stdSigs); i++ {
@@ -138,7 +137,7 @@ func validateBasic(tx StdTx) (err sdk.Error) {
 	return nil
 }
 
-func getSignerAccs(ctx sdk.Context, am AccountMapper, addrs []sdk.AccAddress) (accs []Account, res sdk.Result) {
+func getSignerAccs(ctx sdk.Context, am AccountKeeper, addrs []sdk.AccAddress) (accs []Account, res sdk.Result) {
 	accs = make([]Account, len(addrs))
 	for i := 0; i < len(accs); i++ {
 		accs[i] = am.GetAccount(ctx, addrs[i])
@@ -149,17 +148,23 @@ func getSignerAccs(ctx sdk.Context, am AccountMapper, addrs []sdk.AccAddress) (a
 	return
 }
 
-func validateAccNumAndSequence(accs []Account, sigs []StdSignature) sdk.Result {
+func validateAccNumAndSequence(ctx sdk.Context, accs []Account, sigs []StdSignature) sdk.Result {
 	for i := 0; i < len(accs); i++ {
-		accnum := accs[i].GetAccountNumber()
-		seq := accs[i].GetSequence()
+		// On InitChain, make sure account number == 0
+		if ctx.BlockHeight() == 0 && sigs[i].AccountNumber != 0 {
+			return sdk.ErrInvalidSequence(
+				fmt.Sprintf("Invalid account number for BlockHeight == 0. Got %d, expected 0", sigs[i].AccountNumber)).Result()
+		}
+
 		// Check account number.
-		if accnum != sigs[i].AccountNumber {
+		accnum := accs[i].GetAccountNumber()
+		if ctx.BlockHeight() != 0 && accnum != sigs[i].AccountNumber {
 			return sdk.ErrInvalidSequence(
 				fmt.Sprintf("Invalid account number. Got %d, expected %d", sigs[i].AccountNumber, accnum)).Result()
 		}
 
 		// Check sequence number.
+		seq := accs[i].GetSequence()
 		if seq != sigs[i].Sequence {
 			return sdk.ErrInvalidSequence(
 				fmt.Sprintf("Invalid sequence. Got %d, expected %d", sigs[i].Sequence, seq)).Result()
@@ -252,7 +257,7 @@ func adjustFeesByGas(fees sdk.Coins, gas int64) sdk.Coins {
 }
 
 // Deduct the fee from the account.
-// We could use the CoinKeeper (in addition to the AccountMapper,
+// We could use the CoinKeeper (in addition to the AccountKeeper,
 // because the CoinKeeper doesn't give us accounts), but it seems easier to do this.
 func deductFees(acc Account, fee StdFee) (Account, sdk.Result) {
 	coins := acc.GetCoins()
@@ -277,7 +282,8 @@ func ensureSufficientMempoolFees(ctx sdk.Context, stdTx StdTx) sdk.Result {
 	// TODO: Make the gasPrice not a constant, and account for tx size.
 	requiredFees := adjustFeesByGas(ctx.MinimumFees(), stdTx.Fee.Gas)
 
-	if !ctx.MinimumFees().IsZero() && stdTx.Fee.Amount.IsLT(requiredFees) {
+	// NOTE: !A.IsAllGTE(B) is not the same as A.IsAllLT(B).
+	if !ctx.MinimumFees().IsZero() && !stdTx.Fee.Amount.IsAllGTE(requiredFees) {
 		// validators reject any tx from the mempool with less than the minimum fee per gas * gas factor
 		return sdk.ErrInsufficientFee(fmt.Sprintf(
 			"insufficient fee, got: %q required: %q", stdTx.Fee.Amount, requiredFees)).Result()
@@ -287,7 +293,7 @@ func ensureSufficientMempoolFees(ctx sdk.Context, stdTx StdTx) sdk.Result {
 
 func setGasMeter(simulate bool, ctx sdk.Context, stdTx StdTx) sdk.Context {
 	// set the gas meter
-	if simulate {
+	if simulate || ctx.BlockHeight() == 0 {
 		return ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
 	}
 	return ctx.WithGasMeter(sdk.NewGasMeter(stdTx.Fee.Gas))
@@ -302,6 +308,3 @@ func getSignBytesList(chainID string, stdTx StdTx, stdSigs []StdSignature) (sign
 	}
 	return
 }
-
-// BurnFeeHandler burns all fees (decreasing total supply)
-func BurnFeeHandler(_ sdk.Context, _ sdk.Tx, _ sdk.Coins) {}

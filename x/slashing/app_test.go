@@ -3,15 +3,17 @@ package slashing
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/crypto/ed25519"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/mock"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	"github.com/cosmos/cosmos-sdk/x/stake"
-	"github.com/stretchr/testify/require"
-	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/crypto/ed25519"
+	stakeTypes "github.com/cosmos/cosmos-sdk/x/stake/types"
 )
 
 var (
@@ -31,7 +33,7 @@ func getMockApp(t *testing.T) (*mock.App, stake.Keeper, Keeper) {
 
 	keyParams := sdk.NewKVStoreKey("params")
 	tkeyParams := sdk.NewTransientStoreKey("transient_params")
-	bankKeeper := bank.NewBaseKeeper(mapp.AccountMapper)
+	bankKeeper := bank.NewBaseKeeper(mapp.AccountKeeper)
 
 	paramsKeeper := params.NewKeeper(mapp.Cdc, keyParams, tkeyParams)
 	stakeKeeper := stake.NewKeeper(mapp.Cdc, keyStake, tkeyStake, bankKeeper, paramsKeeper.Subspace(stake.DefaultParamspace), mapp.RegisterCodespace(stake.DefaultCodespace))
@@ -93,8 +95,8 @@ func checkValidatorSigningInfo(t *testing.T, mapp *mock.App, keeper Keeper,
 func TestSlashingMsgs(t *testing.T) {
 	mapp, stakeKeeper, keeper := getMockApp(t)
 
-	genCoin := sdk.NewInt64Coin("steak", 42)
-	bondCoin := sdk.NewInt64Coin("steak", 10)
+	genCoin := sdk.NewInt64Coin(stakeTypes.DefaultBondDenom, 42)
+	bondCoin := sdk.NewInt64Coin(stakeTypes.DefaultBondDenom, 10)
 
 	acc1 := &auth.BaseAccount{
 		Address: addr1,

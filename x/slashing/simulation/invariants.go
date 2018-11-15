@@ -5,10 +5,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/mock/simulation"
 )
 
+// TODO Any invariants to check here?
 // AllInvariants tests all slashing invariants
 func AllInvariants() simulation.Invariant {
-	return func(app *baseapp.BaseApp) error {
-		// TODO Any invariants to check here?
+	return func(_ *baseapp.BaseApp) error {
 		return nil
 	}
 }

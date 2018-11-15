@@ -14,7 +14,6 @@ type (
 	Description          = types.Description
 	Commission           = types.Commission
 	Delegation           = types.Delegation
-	DelegationSummary    = types.DelegationSummary
 	UnbondingDelegation  = types.UnbondingDelegation
 	Redelegation         = types.Redelegation
 	Params               = types.Params
@@ -39,12 +38,13 @@ var (
 	GetDelegationKey             = keeper.GetDelegationKey
 	GetDelegationsKey            = keeper.GetDelegationsKey
 	PoolKey                      = keeper.PoolKey
+	IntraTxCounterKey            = keeper.IntraTxCounterKey
+	LastValidatorPowerKey        = keeper.LastValidatorPowerKey
+	LastTotalPowerKey            = keeper.LastTotalPowerKey
 	ValidatorsKey                = keeper.ValidatorsKey
 	ValidatorsByConsAddrKey      = keeper.ValidatorsByConsAddrKey
-	ValidatorsBondedIndexKey     = keeper.ValidatorsBondedIndexKey
 	ValidatorsByPowerIndexKey    = keeper.ValidatorsByPowerIndexKey
 	DelegationKey                = keeper.DelegationKey
-	IntraTxCounterKey            = keeper.IntraTxCounterKey
 	GetUBDKey                    = keeper.GetUBDKey
 	GetUBDByValIndexKey          = keeper.GetUBDByValIndexKey
 	GetUBDsKey                   = keeper.GetUBDsKey
@@ -56,14 +56,15 @@ var (
 	GetREDsFromValSrcIndexKey    = keeper.GetREDsFromValSrcIndexKey
 	GetREDsToValDstIndexKey      = keeper.GetREDsToValDstIndexKey
 	GetREDsByDelToValDstIndexKey = keeper.GetREDsByDelToValDstIndexKey
+	TestingUpdateValidator       = keeper.TestingUpdateValidator
+	UnbondingQueueKey            = keeper.UnbondingQueueKey
+	RedelegationQueueKey         = keeper.RedelegationQueueKey
+	ValidatorQueueKey            = keeper.ValidatorQueueKey
 
-	DefaultParamspace      = keeper.DefaultParamspace
-	KeyInflationRateChange = types.KeyInflationRateChange
-	KeyInflationMax        = types.KeyInflationMax
-	KeyGoalBonded          = types.KeyGoalBonded
-	KeyUnbondingTime       = types.KeyUnbondingTime
-	KeyMaxValidators       = types.KeyMaxValidators
-	KeyBondDenom           = types.KeyBondDenom
+	DefaultParamspace = keeper.DefaultParamspace
+	KeyUnbondingTime  = types.KeyUnbondingTime
+	KeyMaxValidators  = types.KeyMaxValidators
+	KeyBondDenom      = types.KeyBondDenom
 
 	DefaultParams         = types.DefaultParams
 	InitialPool           = types.InitialPool
@@ -83,19 +84,26 @@ var (
 	NewMsgBeginUnbonding            = types.NewMsgBeginUnbonding
 	NewMsgBeginRedelegate           = types.NewMsgBeginRedelegate
 
-	NewQuerier = querier.NewQuerier
+	NewQuerier              = querier.NewQuerier
+	NewQueryDelegatorParams = querier.NewQueryDelegatorParams
+	NewQueryValidatorParams = querier.NewQueryValidatorParams
+	NewQueryBondsParams     = querier.NewQueryBondsParams
 )
 
 const (
-	QueryValidators          = querier.QueryValidators
-	QueryValidator           = querier.QueryValidator
-	QueryDelegator           = querier.QueryDelegator
-	QueryDelegation          = querier.QueryDelegation
-	QueryUnbondingDelegation = querier.QueryUnbondingDelegation
-	QueryDelegatorValidators = querier.QueryDelegatorValidators
-	QueryDelegatorValidator  = querier.QueryDelegatorValidator
-	QueryPool                = querier.QueryPool
-	QueryParameters          = querier.QueryParameters
+	QueryValidators                    = querier.QueryValidators
+	QueryValidator                     = querier.QueryValidator
+	QueryValidatorUnbondingDelegations = querier.QueryValidatorUnbondingDelegations
+	QueryValidatorRedelegations        = querier.QueryValidatorRedelegations
+	QueryDelegation                    = querier.QueryDelegation
+	QueryUnbondingDelegation           = querier.QueryUnbondingDelegation
+	QueryDelegatorDelegations          = querier.QueryDelegatorDelegations
+	QueryDelegatorUnbondingDelegations = querier.QueryDelegatorUnbondingDelegations
+	QueryDelegatorRedelegations        = querier.QueryDelegatorRedelegations
+	QueryDelegatorValidators           = querier.QueryDelegatorValidators
+	QueryDelegatorValidator            = querier.QueryDelegatorValidator
+	QueryPool                          = querier.QueryPool
+	QueryParameters                    = querier.QueryParameters
 )
 
 const (
