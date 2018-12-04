@@ -20,13 +20,6 @@ func NewDecCoin(denom string, amount int64) DecCoin {
 	}
 }
 
-func NewDecCoinFromDec(denom string, amount sdk.Dec) DecCoin {
-	return DecCoin{
-		Denom:  denom,
-		Amount: amount,
-	}
-}
-
 func NewDecCoinFromCoin(coin sdk.Coin) DecCoin {
 	return DecCoin{
 		Denom:  coin.Denom,
@@ -147,7 +140,7 @@ func (coins DecCoins) MulDec(d sdk.Dec) DecCoins {
 	return res
 }
 
-// divide all the coins by a decimal
+// divide all the coins by a multiple
 func (coins DecCoins) QuoDec(d sdk.Dec) DecCoins {
 	res := make([]DecCoin, len(coins))
 	for i, coin := range coins {
@@ -182,14 +175,4 @@ func (coins DecCoins) AmountOf(denom string) sdk.Dec {
 			return coins[midIdx+1:].AmountOf(denom)
 		}
 	}
-}
-
-// has a negative DecCoin amount
-func (coins DecCoins) HasNegative() bool {
-	for _, coin := range coins {
-		if coin.Amount.IsNegative() {
-			return true
-		}
-	}
-	return false
 }

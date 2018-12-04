@@ -11,6 +11,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	stakeTypes "github.com/cosmos/cosmos-sdk/x/stake/types"
 	"github.com/tendermint/tendermint/crypto/ed25519"
+	stakeTypes "github.com/cosmos/cosmos-sdk/x/stake/types"
 )
 
 var (

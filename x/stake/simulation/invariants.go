@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
+	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -12,6 +13,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/stake"
 	"github.com/cosmos/cosmos-sdk/x/stake/keeper"
 	stakeTypes "github.com/cosmos/cosmos-sdk/x/stake/types"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 // AllInvariants runs all invariants of the stake module.
@@ -20,28 +22,19 @@ func AllInvariants(ck bank.Keeper, k stake.Keeper,
 	f auth.FeeCollectionKeeper, d distribution.Keeper,
 	am auth.AccountKeeper) simulation.Invariant {
 
-	return func(ctx sdk.Context) error {
-		err := SupplyInvariants(ck, k, f, d, am)(ctx)
+	return func(app *baseapp.BaseApp) error {
+		err := SupplyInvariants(ck, k, f, d, am)(app)
 		if err != nil {
 			return err
 		}
 
-		err = PositivePowerInvariant(k)(ctx)
+		err = PositivePowerInvariant(k)(app)
 		if err != nil {
 			return err
 		}
 
-		err = PositiveDelegationInvariant(k)(ctx)
-		if err != nil {
-			return err
-		}
-
-		err = DelegatorSharesInvariant(k)(ctx)
-		if err != nil {
-			return err
-		}
-
-		return nil
+		err = ValidatorSetInvariant(k)(app)
+		return err
 	}
 }
 
@@ -49,7 +42,8 @@ func AllInvariants(ck bank.Keeper, k stake.Keeper,
 // nolint: unparam
 func SupplyInvariants(ck bank.Keeper, k stake.Keeper,
 	f auth.FeeCollectionKeeper, d distribution.Keeper, am auth.AccountKeeper) simulation.Invariant {
-	return func(ctx sdk.Context) error {
+	return func(app *baseapp.BaseApp) error {
+		ctx := app.NewContext(false, abci.Header{})
 		pool := k.GetPool(ctx)
 
 		loose := sdk.ZeroDec()
@@ -113,7 +107,9 @@ func SupplyInvariants(ck bank.Keeper, k stake.Keeper,
 
 // PositivePowerInvariant checks that all stored validators have > 0 power.
 func PositivePowerInvariant(k stake.Keeper) simulation.Invariant {
-	return func(ctx sdk.Context) error {
+	return func(app *baseapp.BaseApp) error {
+		ctx := app.NewContext(false, abci.Header{})
+
 		iterator := k.ValidatorsPowerStoreIterator(ctx)
 		pool := k.GetPool(ctx)
 
@@ -135,45 +131,10 @@ func PositivePowerInvariant(k stake.Keeper) simulation.Invariant {
 	}
 }
 
-// PositiveDelegationInvariant checks that all stored delegations have > 0 shares.
-func PositiveDelegationInvariant(k stake.Keeper) simulation.Invariant {
-	return func(ctx sdk.Context) error {
-		delegations := k.GetAllDelegations(ctx)
-		for _, delegation := range delegations {
-			if delegation.Shares.IsNegative() {
-				return fmt.Errorf("delegation with negative shares: %+v", delegation)
-			}
-			if delegation.Shares.IsZero() {
-				return fmt.Errorf("delegation with zero shares: %+v", delegation)
-			}
-		}
-
-		return nil
-	}
-}
-
-// DelegatorSharesInvariant checks whether all the delegator shares which persist
-// in the delegator object add up to the correct total delegator shares
-// amount stored in each validator
-func DelegatorSharesInvariant(k stake.Keeper) simulation.Invariant {
-	return func(ctx sdk.Context) error {
-		validators := k.GetAllValidators(ctx)
-		for _, validator := range validators {
-
-			valTotalDelShares := validator.GetDelegatorShares()
-
-			totalDelShares := sdk.ZeroDec()
-			delegations := k.GetValidatorDelegations(ctx, validator.GetOperator())
-			for _, delegation := range delegations {
-				totalDelShares = totalDelShares.Add(delegation.Shares)
-			}
-
-			if !valTotalDelShares.Equal(totalDelShares) {
-				return fmt.Errorf("broken delegator shares invariance:\n"+
-					"\tvalidator.DelegatorShares: %v\n"+
-					"\tsum of Delegator.Shares: %v", valTotalDelShares, totalDelShares)
-			}
-		}
+// ValidatorSetInvariant checks equivalence of Tendermint validator set and SDK validator set
+func ValidatorSetInvariant(k stake.Keeper) simulation.Invariant {
+	return func(app *baseapp.BaseApp) error {
+		// TODO
 		return nil
 	}
 }

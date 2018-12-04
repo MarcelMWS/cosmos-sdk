@@ -5,50 +5,38 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
-
-	"github.com/cosmos/go-bip39"
-	"github.com/gorilla/mux"
-	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"github.com/tendermint/tendermint/libs/cli"
 
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/gorilla/mux"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+
 	ccrypto "github.com/cosmos/cosmos-sdk/crypto"
 	"github.com/cosmos/cosmos-sdk/crypto/keys"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/hd"
+
+	"github.com/tendermint/tendermint/libs/cli"
 )
 
 const (
-	flagInteractive = "interactive"
-	flagBIP44Path   = "bip44-path"
-	flagRecover     = "recover"
-	flagNoBackup    = "no-backup"
-	flagDryRun      = "dry-run"
-	flagAccount     = "account"
-	flagIndex       = "index"
+	flagType     = "type"
+	flagRecover  = "recover"
+	flagNoBackup = "no-backup"
+	flagDryRun   = "dry-run"
+	flagAccount  = "account"
+	flagIndex    = "index"
 )
 
 func addKeyCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add <name>",
-		Short: "Add an encrypted private key (either newly generated or recovered), encrypt it, and save to disk",
-		Long: `Derive a new private key and encrypt to disk.
-Optionally specify a BIP39 mnemonic, a BIP39 passphrase to further secure the mnemonic,
-and a bip32 HD path to derive a specific account. The key will be stored under the given name 
-and encrypted with the given password. The only input that is required is the encryption password.
-
-If run with -i, it will prompt the user for BIP44 path, BIP39 mnemonic, and passphrase.
-The flag --recover allows one to recover a key from a seed passphrase.
-If run with --dry-run, a key would be generated (or recovered) but not stored to the local keystore.
-`,
-		Args: cobra.ExactArgs(1),
+		Short: "Create a new key, or import from seed",
+		Long: `Add a public/private key pair to the key store.
+If you select --seed/-s you can recover a key from the seed
+phrase, otherwise, a new key will be generated.`,
 		RunE: runAddCmd,
 	}
-	cmd.Flags().BoolP(flagInteractive, "i", false, "Interactively prompt user for BIP39 passphrase and mnemonic")
+	cmd.Flags().StringP(flagType, "t", "secp256k1", "Type of private key (secp256k1|ed25519)")
 	cmd.Flags().Bool(client.FlagUseLedger, false, "Store a local reference to a private key on a Ledger device")
-	cmd.Flags().String(flagBIP44Path, "44'/118'/0'/0/0", "BIP44 path from which to derive a private key")
 	cmd.Flags().Bool(flagRecover, false, "Provide seed phrase to recover existing key instead of creating")
 	cmd.Flags().Bool(flagNoBackup, false, "Don't print out seed phrase (if others are watching the terminal)")
 	cmd.Flags().Bool(flagDryRun, false, "Perform action, but don't add key to local keystore")
@@ -57,28 +45,24 @@ If run with --dry-run, a key would be generated (or recovered) but not stored to
 	return cmd
 }
 
-/*
-input
-	- bip39 mnemonic
-	- bip39 passphrase
-	- bip44 path
-	- local encryption password
-output
-	- armor encrypted private key (saved to file)
-*/
+// TODO remove the above when addressing #1446
 func runAddCmd(cmd *cobra.Command, args []string) error {
 	var kb keys.Keybase
 	var err error
-	var encrypPassword string
+	var name, pass string
 
 	buf := client.BufferStdin()
-	name := args[0]
 	if viper.GetBool(flagDryRun) {
 		// we throw this away, so don't enforce args,
 		// we want to get a new random seed phrase quickly
 		kb = client.MockKeyBase()
-		encrypPassword = "throwing-this-key-away"
+		pass = "throwing-this-key-away"
+		name = "inmemorykey"
 	} else {
+		if len(args) != 1 || len(args[0]) == 0 {
+			return errMissingName()
+		}
+		name = args[0]
 		kb, err = GetKeyBaseWithWritePerm()
 		if err != nil {
 			return err
@@ -95,8 +79,8 @@ func runAddCmd(cmd *cobra.Command, args []string) error {
 
 		// ask for a password when generating a local key
 		if !viper.GetBool(client.FlagUseLedger) {
-			encrypPassword, err = client.GetCheckPassword(
-				"Enter a passphrase to encrypt your key to disk:",
+			pass, err = client.GetCheckPassword(
+				"Enter a passphrase for your key:",
 				"Repeat the passphrase:", buf)
 			if err != nil {
 				return err
@@ -104,138 +88,52 @@ func runAddCmd(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	interactive := viper.GetBool(flagInteractive)
-	flags := cmd.Flags()
-	bipFlag := flags.Lookup(flagBIP44Path)
-
-	bip44Params, err := getBIP44ParamsAndPath(bipFlag.Value.String(), bipFlag.Changed || !interactive)
-	if err != nil {
-		return err
-	}
-
-	// If we're using ledger, only thing we need is the path. So generate key and
-	// we're done.
 	if viper.GetBool(client.FlagUseLedger) {
 		account := uint32(viper.GetInt(flagAccount))
 		index := uint32(viper.GetInt(flagIndex))
 		path := ccrypto.DerivationPath{44, 118, account, 0, index}
-		info, err := kb.CreateLedger(name, path, keys.Secp256k1)
+		algo := keys.SigningAlgo(viper.GetString(flagType))
+		info, err := kb.CreateLedger(name, path, algo)
 		if err != nil {
 			return err
 		}
-
 		printCreate(info, "")
-		return nil
-	}
-
-	// Recover key from seed passphrase
-	if viper.GetBool(flagRecover) {
+	} else if viper.GetBool(flagRecover) {
 		seed, err := client.GetSeed(
 			"Enter your recovery seed phrase:", buf)
 		if err != nil {
 			return err
 		}
-		info, err := kb.CreateKey(name, seed, encrypPassword)
+		info, err := kb.CreateKey(name, seed, pass)
 		if err != nil {
 			return err
 		}
 		// print out results without the seed phrase
 		viper.Set(flagNoBackup, true)
 		printCreate(info, "")
-		return nil
-	}
-
-	var mnemonic string
-	if interactive {
-		mnemonic, err = client.GetString("Enter your bip39 mnemonic, or hit enter to generate one.", buf)
+	} else {
+		algo := keys.SigningAlgo(viper.GetString(flagType))
+		info, seed, err := kb.CreateMnemonic(name, keys.English, pass, algo)
 		if err != nil {
 			return err
 		}
+		printCreate(info, seed)
 	}
-
-	if len(mnemonic) == 0 {
-		// read entropy seed straight from crypto.Rand and convert to mnemonic
-		entropySeed, err := bip39.NewEntropy(mnemonicEntropySize)
-		if err != nil {
-			return err
-		}
-
-		mnemonic, err = bip39.NewMnemonic(entropySeed[:])
-		if err != nil {
-			return err
-		}
-	}
-
-	// get bip39 passphrase
-	var bip39Passphrase string
-	if interactive {
-		bip39Passphrase, err = client.GetString(
-			"Enter your bip39 passphrase. This is combined with the mnemonic to derive the seed. "+
-				"Most users should just hit enter to use the default, \"\"", buf)
-		if err != nil {
-			return err
-		}
-
-		// if they use one, make them re-enter it
-		if len(bip39Passphrase) != 0 {
-			p2, err := client.GetString("Repeat the passphrase:", buf)
-			if err != nil {
-				return err
-			}
-
-			if bip39Passphrase != p2 {
-				return errors.New("passphrases don't match")
-			}
-		}
-	}
-
-	info, err := kb.Derive(name, mnemonic, bip39Passphrase, encrypPassword, *bip44Params)
-	if err != nil {
-		return err
-	}
-	printCreate(info, mnemonic)
 	return nil
-}
-
-func getBIP44ParamsAndPath(path string, flagSet bool) (*hd.BIP44Params, error) {
-	buf := client.BufferStdin()
-	bip44Path := path
-
-	// if it wasn't set in the flag, give it a chance to overide interactively
-	if !flagSet {
-		var err error
-
-		bip44Path, err = client.GetString(fmt.Sprintf("Enter your bip44 path. Default is %s\n", path), buf)
-		if err != nil {
-			return nil, err
-		}
-
-		if len(bip44Path) == 0 {
-			bip44Path = path
-		}
-	}
-
-	bip44params, err := hd.NewParamsFromPath(bip44Path)
-	if err != nil {
-		return nil, err
-	}
-
-	return bip44params, nil
 }
 
 func printCreate(info keys.Info, seed string) {
 	output := viper.Get(cli.OutputFlag)
 	switch output {
 	case "text":
-		fmt.Fprintln(os.Stderr, "")
 		printKeyInfo(info, Bech32KeyOutput)
 
 		// print seed unless requested not to.
 		if !viper.GetBool(client.FlagUseLedger) && !viper.GetBool(flagNoBackup) {
-			fmt.Fprintln(os.Stderr, "\n**Important** write this seed phrase in a safe place.")
-			fmt.Fprintln(os.Stderr, "It is the only way to recover your account if you ever forget your password.")
-			fmt.Fprintln(os.Stderr)
-			fmt.Fprintln(os.Stderr, seed)
+			fmt.Println("**Important** write this seed phrase in a safe place.")
+			fmt.Println("It is the only way to recover your account if you ever forget your password.")
+			fmt.Println()
+			fmt.Println(seed)
 		}
 	case "json":
 		out, err := Bech32KeyOutput(info)
@@ -254,27 +152,10 @@ func printCreate(info keys.Info, seed string) {
 		if err != nil {
 			panic(err) // really shouldn't happen...
 		}
-		fmt.Fprintln(os.Stderr, string(jsonString))
+		fmt.Println(string(jsonString))
 	default:
 		panic(fmt.Sprintf("I can't speak: %s", output))
 	}
-}
-
-// function to just a new seed to display in the UI before actually persisting it in the keybase
-func getSeed(algo keys.SigningAlgo) string {
-	kb := client.MockKeyBase()
-	pass := "throwing-this-key-away"
-	name := "inmemorykey"
-	_, seed, _ := kb.CreateMnemonic(name, keys.English, pass, algo)
-	return seed
-}
-
-func printPrefixed(msg string) {
-	fmt.Fprintln(os.Stderr, msg)
-}
-
-func printStep() {
-	printPrefixed("-------------------------------------")
 }
 
 /////////////////////////////
@@ -359,6 +240,15 @@ func AddNewKeyRequestHandler(indent bool) http.HandlerFunc {
 
 		PostProcessResponse(w, cdc, keyOutput, indent)
 	}
+}
+
+// function to just a new seed to display in the UI before actually persisting it in the keybase
+func getSeed(algo keys.SigningAlgo) string {
+	kb := client.MockKeyBase()
+	pass := "throwing-this-key-away"
+	name := "inmemorykey"
+	_, seed, _ := kb.CreateMnemonic(name, keys.English, pass, algo)
+	return seed
 }
 
 // Seed REST request handler

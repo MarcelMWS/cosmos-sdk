@@ -83,10 +83,10 @@ func NewDemocoinApp(logger log.Logger, db dbm.DB) *DemocoinApp {
 
 	// Add handlers.
 	app.bankKeeper = bank.NewBaseKeeper(app.accountKeeper)
-	app.coolKeeper = cool.NewKeeper(app.capKeyMainStore, app.bankKeeper, cool.DefaultCodespace)
-	app.powKeeper = pow.NewKeeper(app.capKeyPowStore, pow.NewConfig("pow", int64(1)), app.bankKeeper, pow.DefaultCodespace)
-	app.ibcMapper = ibc.NewMapper(app.cdc, app.capKeyIBCStore, ibc.DefaultCodespace)
-	app.stakeKeeper = simplestake.NewKeeper(app.capKeyStakingStore, app.bankKeeper, simplestake.DefaultCodespace)
+	app.coolKeeper = cool.NewKeeper(app.capKeyMainStore, app.bankKeeper, app.RegisterCodespace(cool.DefaultCodespace))
+	app.powKeeper = pow.NewKeeper(app.capKeyPowStore, pow.NewConfig("pow", int64(1)), app.bankKeeper, app.RegisterCodespace(pow.DefaultCodespace))
+	app.ibcMapper = ibc.NewMapper(app.cdc, app.capKeyIBCStore, app.RegisterCodespace(ibc.DefaultCodespace))
+	app.stakeKeeper = simplestake.NewKeeper(app.capKeyStakingStore, app.bankKeeper, app.RegisterCodespace(simplestake.DefaultCodespace))
 	app.Router().
 		AddRoute("bank", bank.NewHandler(app.bankKeeper)).
 		AddRoute("cool", cool.NewHandler(app.coolKeeper)).
@@ -97,7 +97,7 @@ func NewDemocoinApp(logger log.Logger, db dbm.DB) *DemocoinApp {
 
 	// Initialize BaseApp.
 	app.SetInitChainer(app.initChainerFn(app.coolKeeper, app.powKeeper))
-	app.MountStores(app.capKeyMainStore, app.capKeyAccountStore, app.capKeyPowStore, app.capKeyIBCStore, app.capKeyStakingStore)
+	app.MountStoresIAVL(app.capKeyMainStore, app.capKeyAccountStore, app.capKeyPowStore, app.capKeyIBCStore, app.capKeyStakingStore)
 	app.SetAnteHandler(auth.NewAnteHandler(app.accountKeeper, app.feeCollectionKeeper))
 	err := app.LoadLatestVersion(app.capKeyMainStore)
 	if err != nil {

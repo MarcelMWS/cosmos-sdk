@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/ed25519"
@@ -18,8 +17,6 @@ const (
 	maxMemoCharacters           = 100
 	// how much gas = 1 atom
 	gasPerUnitCost = 1000
-	// max total number of sigs per tx
-	txSigLimit = 7
 )
 
 // NewAnteHandler returns an AnteHandler that checks
@@ -66,25 +63,27 @@ func NewAnteHandler(am AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 			}
 		}()
 
-		if err := tx.ValidateBasic(); err != nil {
+		err := validateBasic(stdTx)
+		if err != nil {
 			return newCtx, err.Result(), true
 		}
-
 		// charge gas for the memo
 		newCtx.GasMeter().ConsumeGas(memoCostPerByte*sdk.Gas(len(stdTx.GetMemo())), "memo")
 
-		// stdSigs contains the sequence number, account number, and signatures.
-		// When simulating, this would just be a 0-length slice.
-		stdSigs := stdTx.GetSignatures()
+		// stdSigs contains the sequence number, account number, and signatures
+		stdSigs := stdTx.GetSignatures() // When simulating, this would just be a 0-length slice.
 		signerAddrs := stdTx.GetSigners()
+
+		// create the list of all sign bytes
+		signBytesList := getSignBytesList(newCtx.ChainID(), stdTx, stdSigs)
 		signerAccs, res := getSignerAccs(newCtx, am, signerAddrs)
 		if !res.IsOK() {
 			return newCtx, res, true
 		}
-
-		isGenesis := ctx.BlockHeight() == 0
-		// create the list of all sign bytes
-		signBytesList := getSignBytesList(newCtx.ChainID(), stdTx, signerAccs, isGenesis)
+		res = validateAccNumAndSequence(ctx, signerAccs, stdSigs)
+		if !res.IsOK() {
+			return newCtx, res, true
+		}
 
 		// first sig pays the fees
 		if !stdTx.Fee.Amount.IsZero() {
@@ -115,6 +114,29 @@ func NewAnteHandler(am AccountKeeper, fck FeeCollectionKeeper) sdk.AnteHandler {
 	}
 }
 
+// Validate the transaction based on things that don't depend on the context
+func validateBasic(tx StdTx) (err sdk.Error) {
+	// Assert that there are signatures.
+	sigs := tx.GetSignatures()
+	if len(sigs) == 0 {
+		return sdk.ErrUnauthorized("no signers")
+	}
+
+	// Assert that number of signatures is correct.
+	var signerAddrs = tx.GetSigners()
+	if len(sigs) != len(signerAddrs) {
+		return sdk.ErrUnauthorized("wrong number of signers")
+	}
+
+	memo := tx.GetMemo()
+	if len(memo) > maxMemoCharacters {
+		return sdk.ErrMemoTooLarge(
+			fmt.Sprintf("maximum number of characters is %d but received %d characters",
+				maxMemoCharacters, len(memo)))
+	}
+	return nil
+}
+
 func getSignerAccs(ctx sdk.Context, am AccountKeeper, addrs []sdk.AccAddress) (accs []Account, res sdk.Result) {
 	accs = make([]Account, len(addrs))
 	for i := 0; i < len(accs); i++ {
@@ -124,6 +146,31 @@ func getSignerAccs(ctx sdk.Context, am AccountKeeper, addrs []sdk.AccAddress) (a
 		}
 	}
 	return
+}
+
+func validateAccNumAndSequence(ctx sdk.Context, accs []Account, sigs []StdSignature) sdk.Result {
+	for i := 0; i < len(accs); i++ {
+		// On InitChain, make sure account number == 0
+		if ctx.BlockHeight() == 0 && sigs[i].AccountNumber != 0 {
+			return sdk.ErrInvalidSequence(
+				fmt.Sprintf("Invalid account number for BlockHeight == 0. Got %d, expected 0", sigs[i].AccountNumber)).Result()
+		}
+
+		// Check account number.
+		accnum := accs[i].GetAccountNumber()
+		if ctx.BlockHeight() != 0 && accnum != sigs[i].AccountNumber {
+			return sdk.ErrInvalidSequence(
+				fmt.Sprintf("Invalid account number. Got %d, expected %d", sigs[i].AccountNumber, accnum)).Result()
+		}
+
+		// Check sequence number.
+		seq := accs[i].GetSequence()
+		if seq != sigs[i].Sequence {
+			return sdk.ErrInvalidSequence(
+				fmt.Sprintf("Invalid sequence. Got %d, expected %d", sigs[i].Sequence, seq)).Result()
+		}
+	}
+	return sdk.Result{}
 }
 
 // verify the signature and increment the sequence.
@@ -199,16 +246,13 @@ func consumeSignatureVerificationGas(meter sdk.GasMeter, pubkey crypto.PubKey) {
 	}
 }
 
-func adjustFeesByGas(fees sdk.Coins, gas uint64) sdk.Coins {
+func adjustFeesByGas(fees sdk.Coins, gas int64) sdk.Coins {
 	gasCost := gas / gasPerUnitCost
 	gasFees := make(sdk.Coins, len(fees))
-
 	// TODO: Make this not price all coins in the same way
-	// TODO: Undo int64 casting once unsigned integers are supported for coins
 	for i := 0; i < len(fees); i++ {
-		gasFees[i] = sdk.NewInt64Coin(fees[i].Denom, int64(gasCost))
+		gasFees[i] = sdk.NewInt64Coin(fees[i].Denom, gasCost)
 	}
-
 	return fees.Plus(gasFees)
 }
 
@@ -219,35 +263,23 @@ func deductFees(acc Account, fee StdFee) (Account, sdk.Result) {
 	coins := acc.GetCoins()
 	feeAmount := fee.Amount
 
-	if !feeAmount.IsValid() {
-		return nil, sdk.ErrInsufficientFee(fmt.Sprintf("invalid fee amount: %s", feeAmount)).Result()
-	}
-
-	newCoins, ok := coins.SafeMinus(feeAmount)
-	if ok {
+	newCoins := coins.Minus(feeAmount)
+	if !newCoins.IsNotNegative() {
 		errMsg := fmt.Sprintf("%s < %s", coins, feeAmount)
 		return nil, sdk.ErrInsufficientFunds(errMsg).Result()
 	}
-
 	err := acc.SetCoins(newCoins)
 	if err != nil {
 		// Handle w/ #870
 		panic(err)
 	}
-
 	return acc, sdk.Result{}
 }
 
 func ensureSufficientMempoolFees(ctx sdk.Context, stdTx StdTx) sdk.Result {
 	// currently we use a very primitive gas pricing model with a constant gasPrice.
 	// adjustFeesByGas handles calculating the amount of fees required based on the provided gas.
-	//
-	// TODO:
-	// - Make the gasPrice not a constant, and account for tx size.
-	// - Make Gas an unsigned integer and use tx basic validation
-	if stdTx.Fee.Gas <= 0 {
-		return sdk.ErrInternal(fmt.Sprintf("invalid gas supplied: %d", stdTx.Fee.Gas)).Result()
-	}
+	// TODO: Make the gasPrice not a constant, and account for tx size.
 	requiredFees := adjustFeesByGas(ctx.MinimumFees(), stdTx.Fee.Gas)
 
 	// NOTE: !A.IsAllGTE(B) is not the same as A.IsAllLT(B).
@@ -260,24 +292,18 @@ func ensureSufficientMempoolFees(ctx sdk.Context, stdTx StdTx) sdk.Result {
 }
 
 func setGasMeter(simulate bool, ctx sdk.Context, stdTx StdTx) sdk.Context {
-	// In various cases such as simulation and during the genesis block, we do not
-	// meter any gas utilization.
+	// set the gas meter
 	if simulate || ctx.BlockHeight() == 0 {
 		return ctx.WithGasMeter(sdk.NewInfiniteGasMeter())
 	}
-
 	return ctx.WithGasMeter(sdk.NewGasMeter(stdTx.Fee.Gas))
 }
 
-func getSignBytesList(chainID string, stdTx StdTx, accs []Account, genesis bool) (signatureBytesList [][]byte) {
-	signatureBytesList = make([][]byte, len(accs))
-	for i := 0; i < len(accs); i++ {
-		accNum := accs[i].GetAccountNumber()
-		if genesis {
-			accNum = 0
-		}
+func getSignBytesList(chainID string, stdTx StdTx, stdSigs []StdSignature) (signatureBytesList [][]byte) {
+	signatureBytesList = make([][]byte, len(stdSigs))
+	for i := 0; i < len(stdSigs); i++ {
 		signatureBytesList[i] = StdSignBytes(chainID,
-			accNum, accs[i].GetSequence(),
+			stdSigs[i].AccountNumber, stdSigs[i].Sequence,
 			stdTx.Fee, stdTx.Msgs, stdTx.Memo)
 	}
 	return

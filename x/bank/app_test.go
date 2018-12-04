@@ -24,8 +24,8 @@ type (
 		expSimPass       bool
 		expPass          bool
 		msgs             []sdk.Msg
-		accNums          []uint64
-		accSeqs          []uint64
+		accNums          []int64
+		accSeqs          []int64
 		privKeys         []crypto.PrivKey
 		expectedBalances []expectedBalance
 	}
@@ -109,8 +109,8 @@ func TestMsgSendWithAccounts(t *testing.T) {
 	testCases := []appTestCase{
 		{
 			msgs:       []sdk.Msg{sendMsg1},
-			accNums:    []uint64{0},
-			accSeqs:    []uint64{0},
+			accNums:    []int64{0},
+			accSeqs:    []int64{0},
 			expSimPass: true,
 			expPass:    true,
 			privKeys:   []crypto.PrivKey{priv1},
@@ -121,9 +121,9 @@ func TestMsgSendWithAccounts(t *testing.T) {
 		},
 		{
 			msgs:       []sdk.Msg{sendMsg1, sendMsg2},
-			accNums:    []uint64{0},
-			accSeqs:    []uint64{0},
-			expSimPass: true, // doesn't check signature
+			accNums:    []int64{0},
+			accSeqs:    []int64{0},
+			expSimPass: false,
 			expPass:    false,
 			privKeys:   []crypto.PrivKey{priv1},
 		},
@@ -136,6 +136,18 @@ func TestMsgSendWithAccounts(t *testing.T) {
 			mock.CheckBalance(t, mapp, eb.addr, eb.coins)
 		}
 	}
+
+	// bumping the tx nonce number without resigning should be an auth error
+	mapp.BeginBlock(abci.RequestBeginBlock{})
+
+	tx := mock.GenTx([]sdk.Msg{sendMsg1}, []int64{0}, []int64{0}, priv1)
+	tx.Signatures[0].Sequence = 1
+
+	res := mapp.Deliver(tx)
+	require.Equal(t, sdk.ToABCICode(sdk.CodespaceRoot, sdk.CodeUnauthorized), res.Code, res.Log)
+
+	// resigning the tx with the bumped sequence should work
+	mock.SignCheckDeliver(t, mapp.BaseApp, []sdk.Msg{sendMsg1, sendMsg2}, []int64{0}, []int64{1}, true, true, priv1)
 }
 
 func TestMsgSendMultipleOut(t *testing.T) {
@@ -155,8 +167,8 @@ func TestMsgSendMultipleOut(t *testing.T) {
 	testCases := []appTestCase{
 		{
 			msgs:       []sdk.Msg{sendMsg2},
-			accNums:    []uint64{0},
-			accSeqs:    []uint64{0},
+			accNums:    []int64{0},
+			accSeqs:    []int64{0},
 			expSimPass: true,
 			expPass:    true,
 			privKeys:   []crypto.PrivKey{priv1},
@@ -198,8 +210,8 @@ func TestSengMsgMultipleInOut(t *testing.T) {
 	testCases := []appTestCase{
 		{
 			msgs:       []sdk.Msg{sendMsg3},
-			accNums:    []uint64{0, 0},
-			accSeqs:    []uint64{0, 0},
+			accNums:    []int64{0, 0},
+			accSeqs:    []int64{0, 0},
 			expSimPass: true,
 			expPass:    true,
 			privKeys:   []crypto.PrivKey{priv1, priv4},
@@ -234,8 +246,8 @@ func TestMsgSendDependent(t *testing.T) {
 	testCases := []appTestCase{
 		{
 			msgs:       []sdk.Msg{sendMsg1},
-			accNums:    []uint64{0},
-			accSeqs:    []uint64{0},
+			accNums:    []int64{0},
+			accSeqs:    []int64{0},
 			expSimPass: true,
 			expPass:    true,
 			privKeys:   []crypto.PrivKey{priv1},
@@ -246,8 +258,8 @@ func TestMsgSendDependent(t *testing.T) {
 		},
 		{
 			msgs:       []sdk.Msg{sendMsg4},
-			accNums:    []uint64{0},
-			accSeqs:    []uint64{0},
+			accNums:    []int64{0},
+			accSeqs:    []int64{0},
 			expSimPass: true,
 			expPass:    true,
 			privKeys:   []crypto.PrivKey{priv2},

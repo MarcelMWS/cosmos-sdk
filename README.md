@@ -12,16 +12,19 @@
 [![riot.im](https://img.shields.io/badge/riot.im-JOIN%20CHAT-green.svg)](https://riot.im/app/#/room/#cosmos-sdk:matrix.org)
 
 The Cosmos-SDK is a framework for building blockchain applications in Golang.
-It is being used to build `Gaia`, the first implementation of the Cosmos Hub.
+It is being used to build `Gaia`, the first implementation of the [Cosmos Hub](https://cosmos.network/docs/),
 
 **WARNING**: The SDK has mostly stabilized, but we are still making some
 breaking changes.
 
 **Note**: Requires [Go 1.11+](https://golang.org/dl/)
 
-## Cosmos Hub Public Testnet
+## Gaia Testnet
 
-To run a full-node in the latest public testnet of the Hub, first [install `gaia`](./docs/gaia/installation.md), then follow [the guide](./docs/gaia/join-testnet.md).
+To install the binaries, read the [install instructions](./docs/gaia/installation.md)
+
+To join the latest testnet, follow 
+[the guide](./docs/gaia/join-testnet.md).
 
 For status updates and genesis files, see the
 [testnets repo](https://github.com/cosmos/testnets).

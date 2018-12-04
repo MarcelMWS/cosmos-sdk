@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"regexp"
-	"strings"
 	"testing"
 	"time"
 
@@ -284,7 +283,7 @@ func TestCoinSend(t *testing.T) {
 
 	// test failure with negative gas
 	res, body, _ = doSendWithGas(t, port, seed, name, password, addr, "-200", 0, "")
-	require.Equal(t, http.StatusBadRequest, res.StatusCode, body)
+	require.Equal(t, http.StatusInternalServerError, res.StatusCode, body)
 
 	// test failure with 0 gas
 	res, body, _ = doSendWithGas(t, port, seed, name, password, addr, "0", 0, "")
@@ -390,8 +389,8 @@ func TestCoinSendGenerateSignAndBroadcast(t *testing.T) {
 	require.Nil(t, cdc.UnmarshalJSON([]byte(body), &resultTx))
 	require.Equal(t, uint32(0), resultTx.CheckTx.Code)
 	require.Equal(t, uint32(0), resultTx.DeliverTx.Code)
-	require.Equal(t, gasEstimate, uint64(resultTx.DeliverTx.GasWanted))
-	require.Equal(t, gasEstimate, uint64(resultTx.DeliverTx.GasUsed))
+	require.Equal(t, gasEstimate, resultTx.DeliverTx.GasWanted)
+	require.Equal(t, gasEstimate, resultTx.DeliverTx.GasUsed)
 }
 
 func TestTxs(t *testing.T) {
@@ -400,39 +399,57 @@ func TestTxs(t *testing.T) {
 	cleanup, _, _, port := InitializeTestLCD(t, 1, []sdk.AccAddress{addr})
 	defer cleanup()
 
-	var emptyTxs []tx.Info
-	txs := getTransactions(t, port)
-	require.Equal(t, emptyTxs, txs)
+	// query wrong
+	res, body := Request(t, port, "GET", "/txs", nil)
+	require.Equal(t, http.StatusBadRequest, res.StatusCode, body)
 
 	// query empty
-	txs = getTransactions(t, port, fmt.Sprintf("sender=%s", addr.String()))
-	require.Equal(t, emptyTxs, txs)
+	res, body = Request(t, port, "GET", fmt.Sprintf("/txs?tag=sender_bech32='%s'", "cosmos1jawd35d9aq4u76sr3fjalmcqc8hqygs90d0g0v"), nil)
+	require.Equal(t, http.StatusOK, res.StatusCode, body)
+	require.Equal(t, "[]", body)
 
-	// also tests url decoding
-	txs = getTransactions(t, port, fmt.Sprintf("sender=%s", addr.String()))
-	require.Equal(t, emptyTxs, txs)
-
-	txs = getTransactions(t, port, fmt.Sprintf("action=submit%%20proposal&proposer=%s", addr.String()))
-	require.Equal(t, emptyTxs, txs)
-
-	// create tx
+	// create TX
 	receiveAddr, resultTx := doSend(t, port, seed, name, password, addr)
+
 	tests.WaitForHeight(resultTx.Height+1, port)
 
+	// check if tx is findable
+	res, body = Request(t, port, "GET", fmt.Sprintf("/txs/%s", resultTx.Hash), nil)
+	require.Equal(t, http.StatusOK, res.StatusCode, body)
+
+	var indexedTxs []tx.Info
+
 	// check if tx is queryable
-	txs = getTransactions(t, port, fmt.Sprintf("tx.hash=%s", resultTx.Hash))
-	require.Len(t, txs, 1)
-	require.Equal(t, resultTx.Hash, txs[0].Hash)
+	res, body = Request(t, port, "GET", fmt.Sprintf("/txs?tag=tx.hash='%s'", resultTx.Hash), nil)
+	require.Equal(t, http.StatusOK, res.StatusCode, body)
+	require.NotEqual(t, "[]", body)
+
+	err := cdc.UnmarshalJSON([]byte(body), &indexedTxs)
+	require.NoError(t, err)
+	require.Equal(t, 1, len(indexedTxs))
+
+	// XXX should this move into some other testfile for txs in general?
+	// test if created TX hash is the correct hash
+	require.Equal(t, resultTx.Hash, indexedTxs[0].Hash)
 
 	// query sender
-	txs = getTransactions(t, port, fmt.Sprintf("sender=%s", addr.String()))
-	require.Len(t, txs, 1)
-	require.Equal(t, resultTx.Height, txs[0].Height)
+	// also tests url decoding
+	res, body = Request(t, port, "GET", fmt.Sprintf("/txs?tag=sender_bech32=%%27%s%%27", addr), nil)
+	require.Equal(t, http.StatusOK, res.StatusCode, body)
+
+	err = cdc.UnmarshalJSON([]byte(body), &indexedTxs)
+	require.NoError(t, err)
+	require.Equal(t, 1, len(indexedTxs), "%v", indexedTxs) // there are 2 txs created with doSend
+	require.Equal(t, resultTx.Height, indexedTxs[0].Height)
 
 	// query recipient
-	txs = getTransactions(t, port, fmt.Sprintf("recipient=%s", receiveAddr.String()))
-	require.Len(t, txs, 1)
-	require.Equal(t, resultTx.Height, txs[0].Height)
+	res, body = Request(t, port, "GET", fmt.Sprintf("/txs?tag=recipient_bech32='%s'", receiveAddr), nil)
+	require.Equal(t, http.StatusOK, res.StatusCode, body)
+
+	err = cdc.UnmarshalJSON([]byte(body), &indexedTxs)
+	require.NoError(t, err)
+	require.Equal(t, 1, len(indexedTxs))
+	require.Equal(t, resultTx.Height, indexedTxs[0].Height)
 }
 
 func TestPoolParamsQuery(t *testing.T) {
@@ -517,14 +534,6 @@ func TestBonding(t *testing.T) {
 	require.Equal(t, uint32(0), resultTx.CheckTx.Code)
 	require.Equal(t, uint32(0), resultTx.DeliverTx.Code)
 
-	// query tx
-	txs := getTransactions(t, port,
-		fmt.Sprintf("action=delegate&delegator=%s", addr),
-		fmt.Sprintf("destination-validator=%s", operAddrs[0]),
-	)
-	require.Len(t, txs, 1)
-	require.Equal(t, resultTx.Height, txs[0].Height)
-
 	acc := getAccount(t, port, addr)
 	coins := acc.GetCoins()
 
@@ -562,14 +571,6 @@ func TestBonding(t *testing.T) {
 	coins = acc.GetCoins()
 	require.Equal(t, int64(40), coins.AmountOf(stakeTypes.DefaultBondDenom).Int64())
 
-	// query tx
-	txs = getTransactions(t, port,
-		fmt.Sprintf("action=begin_unbonding&delegator=%s", addr),
-		fmt.Sprintf("source-validator=%s", operAddrs[0]),
-	)
-	require.Len(t, txs, 1)
-	require.Equal(t, resultTx.Height, txs[0].Height)
-
 	unbonding := getUndelegation(t, port, addr, operAddrs[0])
 	require.Equal(t, "30", unbonding.Balance.Amount.String())
 
@@ -579,15 +580,6 @@ func TestBonding(t *testing.T) {
 
 	require.Equal(t, uint32(0), resultTx.CheckTx.Code)
 	require.Equal(t, uint32(0), resultTx.DeliverTx.Code)
-
-	// query tx
-	txs = getTransactions(t, port,
-		fmt.Sprintf("action=begin_redelegate&delegator=%s", addr),
-		fmt.Sprintf("source-validator=%s", operAddrs[0]),
-		fmt.Sprintf("destination-validator=%s", operAddrs[1]),
-	)
-	require.Len(t, txs, 1)
-	require.Equal(t, resultTx.Height, txs[0].Height)
 
 	// query delegations, unbondings and redelegations from validator and delegator
 	delegatorDels = getDelegatorDelegations(t, port, addr)
@@ -614,7 +606,7 @@ func TestBonding(t *testing.T) {
 	// require.Equal(t, sdk.Unbonding, bondedValidators[0].Status)
 
 	// query txs
-	txs = getBondingTxs(t, port, addr, "")
+	txs := getBondingTxs(t, port, addr, "")
 	require.Len(t, txs, 3, "All Txs found")
 
 	txs = getBondingTxs(t, port, addr, "bond")
@@ -647,11 +639,6 @@ func TestSubmitProposal(t *testing.T) {
 	// query proposal
 	proposal := getProposal(t, port, proposalID)
 	require.Equal(t, "Test", proposal.GetTitle())
-
-	// query tx
-	txs := getTransactions(t, port, fmt.Sprintf("action=submit_proposal&proposer=%s", addr))
-	require.Len(t, txs, 1)
-	require.Equal(t, resultTx.Height, txs[0].Height)
 }
 
 func TestDeposit(t *testing.T) {
@@ -679,11 +666,6 @@ func TestDeposit(t *testing.T) {
 	resultTx = doDeposit(t, port, seed, name, password, addr, proposalID, 5)
 	tests.WaitForHeight(resultTx.Height+1, port)
 
-	// query tx
-	txs := getTransactions(t, port, fmt.Sprintf("action=deposit&depositor=%s", addr))
-	require.Len(t, txs, 1)
-	require.Equal(t, resultTx.Height, txs[0].Height)
-
 	// query proposal
 	proposal = getProposal(t, port, proposalID)
 	require.True(t, proposal.GetTotalDeposit().IsEqual(sdk.Coins{sdk.NewInt64Coin(stakeTypes.DefaultBondDenom, 10)}))
@@ -696,7 +678,7 @@ func TestDeposit(t *testing.T) {
 func TestVote(t *testing.T) {
 	name, password := "test", "1234567890"
 	addr, seed := CreateAddr(t, "test", password, GetKeyBase(t))
-	cleanup, _, operAddrs, port := InitializeTestLCD(t, 1, []sdk.AccAddress{addr})
+	cleanup, _, _, port := InitializeTestLCD(t, 1, []sdk.AccAddress{addr})
 	defer cleanup()
 
 	// create SubmitProposal TX
@@ -714,7 +696,7 @@ func TestVote(t *testing.T) {
 	proposal := getProposal(t, port, proposalID)
 	require.Equal(t, "Test", proposal.GetTitle())
 
-	// deposit
+	// create SubmitProposal TX
 	resultTx = doDeposit(t, port, seed, name, password, addr, proposalID, 5)
 	tests.WaitForHeight(resultTx.Height+1, port)
 
@@ -722,32 +704,13 @@ func TestVote(t *testing.T) {
 	proposal = getProposal(t, port, proposalID)
 	require.Equal(t, gov.StatusVotingPeriod, proposal.GetStatus())
 
-	// vote
+	// create SubmitProposal TX
 	resultTx = doVote(t, port, seed, name, password, addr, proposalID)
 	tests.WaitForHeight(resultTx.Height+1, port)
-
-	// query tx
-	txs := getTransactions(t, port, fmt.Sprintf("action=vote&voter=%s", addr))
-	require.Len(t, txs, 1)
-	require.Equal(t, resultTx.Height, txs[0].Height)
 
 	vote := getVote(t, port, proposalID, addr)
 	require.Equal(t, proposalID, vote.ProposalID)
 	require.Equal(t, gov.OptionYes, vote.Option)
-
-	tally := getTally(t, port, proposalID)
-	require.Equal(t, sdk.ZeroDec(), tally.Yes, "tally should be 0 as the address is not bonded")
-
-	// create bond TX
-	resultTx = doDelegate(t, port, seed, name, password, addr, operAddrs[0], 60)
-	tests.WaitForHeight(resultTx.Height+1, port)
-
-	// vote
-	resultTx = doVote(t, port, seed, name, password, addr, proposalID)
-	tests.WaitForHeight(resultTx.Height+1, port)
-
-	tally = getTally(t, port, proposalID)
-	require.Equal(t, sdk.NewDec(60), tally.Yes, "tally should be equal to the amount delegated")
 }
 
 func TestUnjail(t *testing.T) {
@@ -853,11 +816,11 @@ func TestProposalsQuery(t *testing.T) {
 	require.Equal(t, proposalID3, (proposals[2]).GetProposalID())
 
 	// Test query deposited by addr1
-	proposals = getProposalsFilterDepositor(t, port, addrs[0])
+	proposals = getProposalsFilterDepositer(t, port, addrs[0])
 	require.Equal(t, proposalID1, (proposals[0]).GetProposalID())
 
 	// Test query deposited by addr2
-	proposals = getProposalsFilterDepositor(t, port, addrs[1])
+	proposals = getProposalsFilterDepositer(t, port, addrs[1])
 	require.Equal(t, proposalID2, (proposals[0]).GetProposalID())
 	require.Equal(t, proposalID3, (proposals[1]).GetProposalID())
 
@@ -871,7 +834,7 @@ func TestProposalsQuery(t *testing.T) {
 	require.Equal(t, proposalID3, (proposals[0]).GetProposalID())
 
 	// Test query voted and deposited by addr1
-	proposals = getProposalsFilterVoterDepositor(t, port, addrs[0], addrs[0])
+	proposals = getProposalsFilterVoterDepositer(t, port, addrs[0], addrs[0])
 	require.Equal(t, proposalID2, (proposals[0]).GetProposalID())
 
 	// Test query votes on Proposal 2
@@ -889,7 +852,7 @@ func TestProposalsQuery(t *testing.T) {
 //_____________________________________________________________________________
 // get the account to get the sequence
 func getAccount(t *testing.T, port string, addr sdk.AccAddress) auth.Account {
-	res, body := Request(t, port, "GET", fmt.Sprintf("/auth/accounts/%s", addr.String()), nil)
+	res, body := Request(t, port, "GET", fmt.Sprintf("/auth/accounts/%s", addr), nil)
 	require.Equal(t, http.StatusOK, res.StatusCode, body)
 	var acc auth.Account
 	err := cdc.UnmarshalJSON([]byte(body), &acc)
@@ -967,22 +930,6 @@ func doSend(t *testing.T, port, seed, name, password string, addr sdk.AccAddress
 	return receiveAddr, resultTx
 }
 
-func getTransactions(t *testing.T, port string, tags ...string) []tx.Info {
-	var txs []tx.Info
-	if len(tags) == 0 {
-		return txs
-	}
-	queryStr := strings.Join(tags, "&")
-	res, body := Request(t, port, "GET", fmt.Sprintf("/txs?%s", queryStr), nil)
-	require.Equal(t, http.StatusOK, res.StatusCode, body)
-
-	err := cdc.UnmarshalJSON([]byte(body), &txs)
-	require.NoError(t, err)
-	return txs
-}
-
-// ============= IBC Module ================
-
 func doIBCTransfer(t *testing.T, port, seed, name, password string, addr sdk.AccAddress) (resultTx ctypes.ResultBroadcastTxCommit) {
 	// create receive address
 	kb := client.MockKeyBase()
@@ -1023,8 +970,6 @@ func doIBCTransfer(t *testing.T, port, seed, name, password string, addr sdk.Acc
 	return resultTx
 }
 
-// ============= Slashing Module ================
-
 func getSigningInfo(t *testing.T, port string, validatorPubKey string) slashing.ValidatorSigningInfo {
 	res, body := Request(t, port, "GET", fmt.Sprintf("/slashing/validators/%s/signing_info", validatorPubKey), nil)
 	require.Equal(t, http.StatusOK, res.StatusCode, body)
@@ -1034,31 +979,6 @@ func getSigningInfo(t *testing.T, port string, validatorPubKey string) slashing.
 	require.Nil(t, err)
 
 	return signingInfo
-}
-
-func doUnjail(t *testing.T, port, seed, name, password string,
-	valAddr sdk.ValAddress) (resultTx ctypes.ResultBroadcastTxCommit) {
-	chainID := viper.GetString(client.FlagChainID)
-
-	jsonStr := []byte(fmt.Sprintf(`{
-		"base_req": {
-			"name": "%s",
-			"password": "%s",
-			"chain_id": "%s",
-			"account_number":"1",
-			"sequence":"1"
-		}
-	}`, name, password, chainID))
-
-	res, body := Request(t, port, "POST", fmt.Sprintf("/slashing/validators/%s/unjail", valAddr.String()), jsonStr)
-	// TODO : fails with "401 must use own validator address"
-	require.Equal(t, http.StatusOK, res.StatusCode, body)
-
-	var results []ctypes.ResultBroadcastTxCommit
-	err := cdc.UnmarshalJSON([]byte(body), &results)
-	require.Nil(t, err)
-
-	return results[0]
 }
 
 // ============= Stake Module ================
@@ -1381,8 +1301,8 @@ func getDeposits(t *testing.T, port string, proposalID uint64) []gov.Deposit {
 	return deposits
 }
 
-func getDeposit(t *testing.T, port string, proposalID uint64, depositorAddr sdk.AccAddress) gov.Deposit {
-	res, body := Request(t, port, "GET", fmt.Sprintf("/gov/proposals/%d/deposits/%s", proposalID, depositorAddr), nil)
+func getDeposit(t *testing.T, port string, proposalID uint64, depositerAddr sdk.AccAddress) gov.Deposit {
+	res, body := Request(t, port, "GET", fmt.Sprintf("/gov/proposals/%d/deposits/%s", proposalID, depositerAddr), nil)
 	require.Equal(t, http.StatusOK, res.StatusCode, body)
 	var deposit gov.Deposit
 	err := cdc.UnmarshalJSON([]byte(body), &deposit)
@@ -1408,15 +1328,6 @@ func getVotes(t *testing.T, port string, proposalID uint64) []gov.Vote {
 	return votes
 }
 
-func getTally(t *testing.T, port string, proposalID uint64) gov.TallyResult {
-	res, body := Request(t, port, "GET", fmt.Sprintf("/gov/proposals/%d/tally", proposalID), nil)
-	require.Equal(t, http.StatusOK, res.StatusCode, body)
-	var tally gov.TallyResult
-	err := cdc.UnmarshalJSON([]byte(body), &tally)
-	require.Nil(t, err)
-	return tally
-}
-
 func getProposalsAll(t *testing.T, port string) []gov.Proposal {
 	res, body := Request(t, port, "GET", "/gov/proposals", nil)
 	require.Equal(t, http.StatusOK, res.StatusCode, body)
@@ -1427,8 +1338,8 @@ func getProposalsAll(t *testing.T, port string) []gov.Proposal {
 	return proposals
 }
 
-func getProposalsFilterDepositor(t *testing.T, port string, depositorAddr sdk.AccAddress) []gov.Proposal {
-	res, body := Request(t, port, "GET", fmt.Sprintf("/gov/proposals?depositor=%s", depositorAddr), nil)
+func getProposalsFilterDepositer(t *testing.T, port string, depositerAddr sdk.AccAddress) []gov.Proposal {
+	res, body := Request(t, port, "GET", fmt.Sprintf("/gov/proposals?depositer=%s", depositerAddr), nil)
 	require.Equal(t, http.StatusOK, res.StatusCode, body)
 
 	var proposals []gov.Proposal
@@ -1447,8 +1358,8 @@ func getProposalsFilterVoter(t *testing.T, port string, voterAddr sdk.AccAddress
 	return proposals
 }
 
-func getProposalsFilterVoterDepositor(t *testing.T, port string, voterAddr, depositorAddr sdk.AccAddress) []gov.Proposal {
-	res, body := Request(t, port, "GET", fmt.Sprintf("/gov/proposals?depositor=%s&voter=%s", depositorAddr, voterAddr), nil)
+func getProposalsFilterVoterDepositer(t *testing.T, port string, voterAddr, depositerAddr sdk.AccAddress) []gov.Proposal {
+	res, body := Request(t, port, "GET", fmt.Sprintf("/gov/proposals?depositer=%s&voter=%s", depositerAddr, voterAddr), nil)
 	require.Equal(t, http.StatusOK, res.StatusCode, body)
 
 	var proposals []gov.Proposal
@@ -1510,7 +1421,7 @@ func doDeposit(t *testing.T, port, seed, name, password string, proposerAddr sdk
 
 	// deposit on proposal
 	jsonStr := []byte(fmt.Sprintf(`{
-		"depositor": "%s",
+		"depositer": "%s",
 		"amount": [{ "denom": "%s", "amount": "%d" }],
 		"base_req": {
 			"name": "%s",

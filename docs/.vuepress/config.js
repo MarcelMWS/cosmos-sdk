@@ -1,6 +1,6 @@
 module.exports = {
-  title: "Cosmos SDK Documentation",
-  description: "Documentation for the Cosmos SDK and Gaia.",
+  title: "Cosmos Documentation",
+  description: "Documentation for the Cosmos Network.",
   ga: "UA-51029217-2",
   dest: "./dist/docs",
   base: "/docs/",
@@ -26,33 +26,12 @@ module.exports = {
         children: [
           "/gaia/installation",
           "/gaia/join-testnet",
-          "/gaia/validators/validator-setup",
+          "/gaia/networks",
           "/gaia/validators/overview",
           "/gaia/validators/security",
           "/gaia/validators/validator-faq",
-          "/gaia/deploy-testnet",
-          "/gaia/ledger",
-          "/gaia/gaiacli"
-        ]
-      },
-      {
-        title: "Tutorial",
-        collapsable: false,
-        children: [
-          "/tutorial/",
-          "/tutorial/app-design",
-          "/tutorial/app-init",
-          "/tutorial/keeper",
-          "/tutorial/msgs-handlers",
-          "/tutorial/set-name",
-          "/tutorial/buy-name",
-          "/tutorial/queriers",
-          "/tutorial/codec",
-          "/tutorial/cli",
-          "/tutorial/app-complete",
-          "/tutorial/entrypoint",
-          "/tutorial/dep",
-          "/tutorial/build-run"
+          "/gaia/validators/validator-setup",
+          "/gaia/ledger"
         ]
       },
       {

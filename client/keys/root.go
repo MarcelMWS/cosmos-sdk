@@ -20,6 +20,7 @@ func Commands() *cobra.Command {
 	}
 	cmd.AddCommand(
 		mnemonicKeyCommand(),
+		newKeyCommand(),
 		addKeyCommand(),
 		listKeysCmd,
 		showKeysCmd(),

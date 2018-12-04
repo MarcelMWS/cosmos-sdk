@@ -28,7 +28,6 @@ type Keeper interface {
 	SetCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) sdk.Error
 	SubtractCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) (sdk.Coins, sdk.Tags, sdk.Error)
 	AddCoins(ctx sdk.Context, addr sdk.AccAddress, amt sdk.Coins) (sdk.Coins, sdk.Tags, sdk.Error)
-	InputOutputCoins(ctx sdk.Context, inputs []Input, outputs []Output) (sdk.Tags, sdk.Error)
 }
 
 // BaseKeeper manages transfers between accounts. It implements the Keeper
@@ -68,14 +67,6 @@ func (keeper BaseKeeper) AddCoins(
 	return addCoins(ctx, keeper.ak, addr, amt)
 }
 
-// InputOutputCoins handles a list of inputs and outputs
-func (keeper BaseKeeper) InputOutputCoins(
-	ctx sdk.Context, inputs []Input, outputs []Output,
-) (sdk.Tags, sdk.Error) {
-
-	return inputOutputCoins(ctx, keeper.ak, inputs, outputs)
-}
-
 //-----------------------------------------------------------------------------
 // Send Keeper
 
@@ -85,6 +76,7 @@ type SendKeeper interface {
 	ViewKeeper
 
 	SendCoins(ctx sdk.Context, fromAddr sdk.AccAddress, toAddr sdk.AccAddress, amt sdk.Coins) (sdk.Tags, sdk.Error)
+	InputOutputCoins(ctx sdk.Context, inputs []Input, outputs []Output) (sdk.Tags, sdk.Error)
 }
 
 var _ SendKeeper = (*BaseSendKeeper)(nil)
@@ -111,6 +103,14 @@ func (keeper BaseSendKeeper) SendCoins(
 ) (sdk.Tags, sdk.Error) {
 
 	return sendCoins(ctx, keeper.ak, fromAddr, toAddr, amt)
+}
+
+// InputOutputCoins handles a list of inputs and outputs
+func (keeper BaseSendKeeper) InputOutputCoins(
+	ctx sdk.Context, inputs []Input, outputs []Output,
+) (sdk.Tags, sdk.Error) {
+
+	return inputOutputCoins(ctx, keeper.ak, inputs, outputs)
 }
 
 //-----------------------------------------------------------------------------
@@ -182,13 +182,11 @@ func hasCoins(ctx sdk.Context, am auth.AccountKeeper, addr sdk.AccAddress, amt s
 // SubtractCoins subtracts amt from the coins at the addr.
 func subtractCoins(ctx sdk.Context, am auth.AccountKeeper, addr sdk.AccAddress, amt sdk.Coins) (sdk.Coins, sdk.Tags, sdk.Error) {
 	ctx.GasMeter().ConsumeGas(costSubtractCoins, "subtractCoins")
-
 	oldCoins := getCoins(ctx, am, addr)
-	newCoins, hasNeg := oldCoins.SafeMinus(amt)
-	if hasNeg {
+	newCoins := oldCoins.Minus(amt)
+	if !newCoins.IsNotNegative() {
 		return amt, nil, sdk.ErrInsufficientCoins(fmt.Sprintf("%s < %s", oldCoins, amt))
 	}
-
 	err := setCoins(ctx, am, addr, newCoins)
 	tags := sdk.NewTags("sender", []byte(addr.String()))
 	return newCoins, tags, err

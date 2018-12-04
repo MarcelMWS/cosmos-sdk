@@ -10,7 +10,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/gov"
 
-	govClientUtils "github.com/cosmos/cosmos-sdk/x/gov/client/utils"
+	"github.com/cosmos/cosmos-sdk/x/gov/client"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 )
@@ -20,7 +20,7 @@ import (
 const (
 	RestParamsType     = "type"
 	RestProposalID     = "proposal-id"
-	RestDepositor      = "depositor"
+	RestDepositer      = "depositer"
 	RestVoter          = "voter"
 	RestProposalStatus = "status"
 	RestNumLimit       = "limit"
@@ -41,8 +41,7 @@ func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, cdc *codec.Codec) 
 	r.HandleFunc("/gov/proposals", queryProposalsWithParameterFn(cdc, cliCtx)).Methods("GET")
 	r.HandleFunc(fmt.Sprintf("/gov/proposals/{%s}", RestProposalID), queryProposalHandlerFn(cdc, cliCtx)).Methods("GET")
 	r.HandleFunc(fmt.Sprintf("/gov/proposals/{%s}/deposits", RestProposalID), queryDepositsHandlerFn(cdc, cliCtx)).Methods("GET")
-	r.HandleFunc(fmt.Sprintf("/gov/proposals/{%s}/deposits/{%s}", RestProposalID, RestDepositor), queryDepositHandlerFn(cdc, cliCtx)).Methods("GET")
-	r.HandleFunc(fmt.Sprintf("/gov/proposals/{%s}/tally", RestProposalID), queryTallyOnProposalHandlerFn(cdc, cliCtx)).Methods("GET")
+	r.HandleFunc(fmt.Sprintf("/gov/proposals/{%s}/deposits/{%s}", RestProposalID, RestDepositer), queryDepositHandlerFn(cdc, cliCtx)).Methods("GET")
 	r.HandleFunc(fmt.Sprintf("/gov/proposals/{%s}/votes", RestProposalID), queryVotesOnProposalHandlerFn(cdc, cliCtx)).Methods("GET")
 	r.HandleFunc(fmt.Sprintf("/gov/proposals/{%s}/votes/{%s}", RestProposalID, RestVoter), queryVoteHandlerFn(cdc, cliCtx)).Methods("GET")
 }
@@ -58,7 +57,7 @@ type postProposalReq struct {
 
 type depositReq struct {
 	BaseReq   utils.BaseReq  `json:"base_req"`
-	Depositor sdk.AccAddress `json:"depositor"` // Address of the depositor
+	Depositer sdk.AccAddress `json:"depositer"` // Address of the depositer
 	Amount    sdk.Coins      `json:"amount"`    // Coins to add to the proposal's deposit
 }
 
@@ -82,7 +81,7 @@ func postProposalHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 			return
 		}
 
-		proposalType, err := gov.ProposalTypeFromString(govClientUtils.NormalizeProposalType(req.ProposalType))
+		proposalType, err := gov.ProposalTypeFromString(client.NormalizeProposalType(req.ProposalType))
 		if err != nil {
 			utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -128,7 +127,7 @@ func depositHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerF
 		}
 
 		// create the message
-		msg := gov.NewMsgDeposit(req.Depositor, proposalID, req.Amount)
+		msg := gov.NewMsgDeposit(req.Depositer, proposalID, req.Amount)
 		err = msg.ValidateBasic()
 		if err != nil {
 			utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
@@ -166,7 +165,7 @@ func voteHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc
 			return
 		}
 
-		voteOption, err := gov.VoteOptionFromString(govClientUtils.NormalizeVoteOption(req.Option))
+		voteOption, err := gov.VoteOptionFromString(client.NormalizeVoteOption(req.Option))
 		if err != nil {
 			utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -245,7 +244,9 @@ func queryDepositsHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Ha
 			return
 		}
 
-		params := gov.NewQueryProposalParams(proposalID)
+		params := gov.QueryDepositsParams{
+			ProposalID: proposalID,
+		}
 
 		bz, err := cdc.MarshalJSON(params)
 		if err != nil {
@@ -267,7 +268,7 @@ func queryDepositHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		strProposalID := vars[RestProposalID]
-		bechDepositorAddr := vars[RestDepositor]
+		bechDepositerAddr := vars[RestDepositer]
 
 		if len(strProposalID) == 0 {
 			err := errors.New("proposalId required but not specified")
@@ -280,13 +281,13 @@ func queryDepositHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 			return
 		}
 
-		if len(bechDepositorAddr) == 0 {
-			err := errors.New("depositor address required but not specified")
+		if len(bechDepositerAddr) == 0 {
+			err := errors.New("depositer address required but not specified")
 			utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
-		depositorAddr, err := sdk.AccAddressFromBech32(bechDepositorAddr)
+		depositerAddr, err := sdk.AccAddressFromBech32(bechDepositerAddr)
 		if err != nil {
 			utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -294,7 +295,7 @@ func queryDepositHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 
 		params := gov.QueryDepositParams{
 			ProposalID: proposalID,
-			Depositor:  depositorAddr,
+			Depositer:  depositerAddr,
 		}
 
 		bz, err := cdc.MarshalJSON(params)
@@ -318,7 +319,7 @@ func queryDepositHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) http.Han
 				utils.WriteErrorResponse(w, http.StatusNotFound, err.Error())
 				return
 			}
-			err = errors.Errorf("depositor [%s] did not deposit on proposalID [%d]", bechDepositorAddr, proposalID)
+			err = errors.Errorf("depositer [%s] did not deposit on proposalID [%d]", bechDepositerAddr, proposalID)
 			utils.WriteErrorResponse(w, http.StatusNotFound, err.Error())
 			return
 		}
@@ -411,8 +412,9 @@ func queryVotesOnProposalHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 			return
 		}
 
-		params := gov.NewQueryProposalParams(proposalID)
-
+		params := gov.QueryVotesParams{
+			ProposalID: proposalID,
+		}
 		bz, err := cdc.MarshalJSON(params)
 		if err != nil {
 			utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
@@ -433,7 +435,7 @@ func queryVotesOnProposalHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 func queryProposalsWithParameterFn(cdc *codec.Codec, cliCtx context.CLIContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		bechVoterAddr := r.URL.Query().Get(RestVoter)
-		bechDepositorAddr := r.URL.Query().Get(RestDepositor)
+		bechDepositerAddr := r.URL.Query().Get(RestDepositer)
 		strProposalStatus := r.URL.Query().Get(RestProposalStatus)
 		strNumLimit := r.URL.Query().Get(RestNumLimit)
 
@@ -448,17 +450,17 @@ func queryProposalsWithParameterFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 			params.Voter = voterAddr
 		}
 
-		if len(bechDepositorAddr) != 0 {
-			depositorAddr, err := sdk.AccAddressFromBech32(bechDepositorAddr)
+		if len(bechDepositerAddr) != 0 {
+			depositerAddr, err := sdk.AccAddressFromBech32(bechDepositerAddr)
 			if err != nil {
 				utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 				return
 			}
-			params.Depositor = depositorAddr
+			params.Depositer = depositerAddr
 		}
 
 		if len(strProposalStatus) != 0 {
-			proposalStatus, err := gov.ProposalStatusFromString(govClientUtils.NormalizeProposalStatus(strProposalStatus))
+			proposalStatus, err := gov.ProposalStatusFromString(client.NormalizeProposalStatus(strProposalStatus))
 			if err != nil {
 				utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 				return
@@ -496,8 +498,10 @@ func queryTallyOnProposalHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 		strProposalID := vars[RestProposalID]
 
 		if len(strProposalID) == 0 {
+			w.WriteHeader(http.StatusBadRequest)
 			err := errors.New("proposalId required but not specified")
-			utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			w.Write([]byte(err.Error()))
+
 			return
 		}
 
@@ -506,17 +510,20 @@ func queryTallyOnProposalHandlerFn(cdc *codec.Codec, cliCtx context.CLIContext) 
 			return
 		}
 
-		params := gov.NewQueryProposalParams(proposalID)
-
+		params := gov.QueryTallyParams{
+			ProposalID: proposalID,
+		}
 		bz, err := cdc.MarshalJSON(params)
 		if err != nil {
-			utils.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(err.Error()))
 			return
 		}
 
 		res, err := cliCtx.QueryWithData("custom/gov/tally", bz)
 		if err != nil {
-			utils.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(err.Error()))
 			return
 		}
 

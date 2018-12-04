@@ -37,21 +37,18 @@ go_install = $(call go_get,$(1),$(2),$(3)) && cd $(GITHUBDIR)$(FS)$(1)$(FS)$(2) 
 # get_tools
 ###
 all: get_tools
-get_tools: $(GOPATH)/bin/dep $(GOPATH)/bin/gometalinter $(GOPATH)/bin/statik $(GOPATH)/bin/goimports
+get_tools: dep gometalinter statik
 
-$(GOPATH)/bin/dep:
+dep:
 	$(call go_get,golang,dep,22125cfaa6ddc71e145b1535d4b7ee9744fefff2)
 	cd $(GITHUBDIR)$(FS)golang$(FS)dep$(FS)cmd$(FS)dep && $(GO) install
 
 #v2.0.11
-$(GOPATH)/bin/gometalinter:
+gometalinter:
 	$(call go_install,alecthomas,gometalinter,17a7ffa42374937bfecabfb8d2efbd4db0c26741)
 
-$(GOPATH)/bin/statik:
+statik:
 	$(call go_install,rakyll,statik,v0.1.5)
 
-$(GOPATH)/bin/goimports:
-	go get golang.org/x/tools/cmd/goimports
-
-.PHONY: all get_tools
+.PHONY: all get_tools dep gometalinter statik
 

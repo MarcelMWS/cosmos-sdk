@@ -18,7 +18,7 @@ func (k Keeper) onValidatorBonded(ctx sdk.Context, address sdk.ConsAddress, _ sd
 			JailedUntil:         time.Unix(0, 0),
 			MissedBlocksCounter: 0,
 		}
-		k.SetValidatorSigningInfo(ctx, address, signingInfo)
+		k.setValidatorSigningInfo(ctx, address, signingInfo)
 	}
 
 	// Create a new slashing period when a validator is bonded

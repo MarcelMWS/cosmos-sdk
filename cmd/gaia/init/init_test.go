@@ -32,7 +32,10 @@ func TestInitCmd(t *testing.T) {
 
 	ctx := server.NewContext(cfg, logger)
 	cdc := app.MakeCodec()
-	cmd := InitCmd(ctx, cdc)
+	appInit := server.AppInit{
+		AppGenState: mock.AppGenState,
+	}
+	cmd := InitCmd(ctx, cdc, appInit)
 
 	viper.Set(flagMoniker, "gaianode-test")
 
@@ -62,9 +65,13 @@ func TestEmptyState(t *testing.T) {
 
 	ctx := server.NewContext(cfg, logger)
 	cdc := app.MakeCodec()
+	appInit := server.AppInit{
+		AppGenState: mock.AppGenStateEmpty,
+	}
+
 	viper.Set(flagMoniker, "gaianode-test")
 
-	cmd := InitCmd(ctx, cdc)
+	cmd := InitCmd(ctx, cdc, appInit)
 	err = cmd.RunE(nil, nil)
 	require.NoError(t, err)
 
@@ -109,7 +116,10 @@ func TestStartStandAlone(t *testing.T) {
 	require.Nil(t, err)
 	ctx := server.NewContext(cfg, logger)
 	cdc := app.MakeCodec()
-	initCmd := InitCmd(ctx, cdc)
+	appInit := server.AppInit{
+		AppGenState: mock.AppGenState,
+	}
+	initCmd := InitCmd(ctx, cdc, appInit)
 	err = initCmd.RunE(nil, nil)
 	require.NoError(t, err)
 

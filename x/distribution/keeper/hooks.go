@@ -10,11 +10,6 @@ import (
 // Create a new validator distribution record
 func (k Keeper) onValidatorCreated(ctx sdk.Context, valAddr sdk.ValAddress) {
 
-	// defensive check for existence
-	if k.HasValidatorDistInfo(ctx, valAddr) {
-		panic("validator dist info already exists (not cleaned up properly)")
-	}
-
 	height := ctx.BlockHeight()
 	vdi := types.ValidatorDistInfo{
 		OperatorAddr:            valAddr,

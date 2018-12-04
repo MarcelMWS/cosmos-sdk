@@ -1,54 +1,9 @@
-# Deploy your own testnet
+# Networks
 
-This document describes 3 ways to setup a network of `gaiad` nodes, each serving a different usecase:
+There are a variety of ways to setup either local or remote networks with automation, detailed below.
+All the required files are found in the [networks directory](https://github.com/cosmos/cosmos-sdk/tree/develop/networks) and additionally the `local` or `remote` sub-directories.
 
-1. Single-node, local, manual testnet
-2. Multi-node, local, automated testnet
-3. Multi-node, remote, automated testnet
-
-Supporting code can be found in the [networks directory](https://github.com/cosmos/cosmos-sdk/tree/develop/networks) and additionally the `local` or `remote` sub-directories.
-
-> NOTE: The `remote` network bootstrapping may be out of sync with the latest releases and is not to be relied upon.
-
-## Single-node, local, manual testnet
-
-This guide helps you create a single validator node that runs a network locally for testing and other development related uses.
-
-### Requirements
-
-- [Install gaia](./installation.md)
-- [Install `jq`](https://stedolan.github.io/jq/download/) (optional)
-
-### Create genesis file and start the network
-
-```bash
-# You can run all of these commands from your home directory
-cd $HOME
-
-# Initialize the genesis.json file that will help you to bootstrap the network
-gaiad init --chain-id testing --moniker testing
-
-# Create a key to hold your validator account
-gaiacli keys add validator
-
-# Add that key into the genesis.app_state.accounts array in the genesis file
-# NOTE: this command lets you set the number of coins. Make sure this account has some coins
-# with the genesis.app_state.stake.params.bond_denom denom, the default is STAKE
-gaiad add-genesis-account $(gaiacli keys show validator -o json | jq -r ".address") 1000STAKE,1000validatorToken
-
-# Generate the transaction that creates your validator
-gaiad gentx --name validator
-
-# Add the generated bonding transaction to the genesis file
-gaiad collect-gentxs
-
-# Now its safe to start `gaiad`
-gaiad start
-```
-
-This setup puts all the data for `gaiad` in `~/.gaiad`. You can examine the genesis file you created at `~/.gaiad/config/genesis.json`. With this configuration `gaiacli` is also ready to use and has an account with tokens (both staking and custom).
-
-## Multi-node, local, automated testnet
+## Local Testnet
 
 From the [networks/local directory](https://github.com/cosmos/cosmos-sdk/tree/develop/networks/local):
 
@@ -60,10 +15,12 @@ From the [networks/local directory](https://github.com/cosmos/cosmos-sdk/tree/de
 
 ### Build
 
-Build the `gaiad` binary (linux) and the `tendermint/gaiadnode` docker image required for running the `localnet` commands. This binary will be mounted into the container and can be updated rebuilding the image, so you only need to build the image once.
+Build the `gaiad` binary and the `tendermint/gaiadnode` docker image.
 
-```bash
-# Work from the SDK repo
+Note the binary will be mounted into the container so it can be updated without
+rebuilding the image.
+
+```
 cd $GOPATH/src/github.com/cosmos/cosmos-sdk
 
 # Build the linux binary in ./build
@@ -73,7 +30,7 @@ make build-linux
 make build-docker-gaiadnode
 ```
 
-### Run your testnet
+### Run a testnet
 
 To start a 4 node testnet run:
 
@@ -94,7 +51,7 @@ The ports for each node are found in this table:
 To update the binary, just rebuild it and restart the nodes:
 
 ```
-make build-linux localnet-start
+make build-linux localnet-stop localnet-start
 ```
 
 ### Configuration
@@ -103,8 +60,7 @@ The `make localnet-start` creates files for a 4-node testnet in `./build` by
 calling the `gaiad testnet` command. This outputs a handful of files in the
 `./build` directory:
 
-```bash
-$ tree -L 2 build/
+```tree -L 2 build/
 build/
 ├── gaiacli
 ├── gaiad
@@ -168,7 +124,7 @@ Now that accounts exists, you may create new accounts and send those accounts
 funds!
 
 ::: tip
-**Note**: Each node's seed is located at `./build/nodeN/gaiacli/key_seed.json` and can be restored to the CLI using the `gaiacli keys add --restore` command
+**Note**: Each node's seed is located at `./build/nodeN/gaiacli/key_seed.json`.
 :::
 
 ### Special binaries
@@ -180,7 +136,7 @@ If you have multiple binaries with different names, you can specify which one to
 BINARY=gaiafoo make localnet-start
 ```
 
-## Multi-node, remote, automated testnet
+## Remote Testnet
 
 The following should be run from the [networks directory](https://github.com/cosmos/cosmos-sdk/tree/develop/networks).
 
@@ -248,4 +204,24 @@ You can install the DataDog agent with:
 
 ```
 make datadog-install
+```
+
+### Single-node testnet
+
+To create a single node testnet:
+
+```
+cd $GOPATH/src/github.com/cosmos/cosmos-sdk
+
+# Clear the build folder
+rm -rf ./build
+
+# Build binary
+make build-linux
+
+# Create configuration
+docker run -v `pwd`/build:/gaiad tendermint/gaiadnode testnet -o . --v 1
+
+# Run the node
+docker run -v `pwd`/build:/gaiad tendermint/gaiadnode
 ```

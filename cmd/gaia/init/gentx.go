@@ -1,32 +1,24 @@
 package init
 
 import (
-	"bytes"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/client/keys"
-	"github.com/cosmos/cosmos-sdk/client/utils"
 	"github.com/cosmos/cosmos-sdk/cmd/gaia/app"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
+	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/stake/client/cli"
 	stakeTypes "github.com/cosmos/cosmos-sdk/x/stake/types"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	cfg "github.com/tendermint/tendermint/config"
 	"github.com/tendermint/tendermint/crypto"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 	"github.com/tendermint/tendermint/libs/common"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 )
 
 const (
@@ -64,24 +56,7 @@ following delegation and commission default parameters:
 			if err != nil {
 				return err
 			}
-
 			genDoc, err := loadGenesisDoc(cdc, config.GenesisFile())
-			if err != nil {
-				return err
-			}
-
-			genesisState := app.GenesisState{}
-			if err = cdc.UnmarshalJSON(genDoc.AppState, &genesisState); err != nil {
-				return err
-			}
-
-			kb, err := keys.GetKeyBaseFromDir(viper.GetString(flagClientHome))
-			if err != nil {
-				return err
-			}
-
-			name := viper.GetString(client.FlagName)
-			key, err := kb.Get(name)
 			if err != nil {
 				return err
 			}
@@ -93,60 +68,29 @@ following delegation and commission default parameters:
 					return err
 				}
 			}
-
-			// Set flags for creating gentx
-			prepareFlagsForTxCreateValidator(config, nodeID, ip, genDoc.ChainID, valPubKey)
-
-			// Fetch the amount of coins staked
-			amount := viper.GetString(cli.FlagAmount)
-			coins, err := sdk.ParseCoins(amount)
-			if err != nil {
-				return err
-			}
-
-			err = accountInGenesis(genesisState, key.GetAddress(), coins)
-			if err != nil {
-				return err
-			}
-
 			// Run gaiad tx create-validator
-			txBldr := authtxb.NewTxBuilderFromCLI().WithCodec(cdc)
-			cliCtx := context.NewCLIContext().WithCodec(cdc)
-			cliCtx, txBldr, msg, err := cli.BuildCreateValidatorMsg(cliCtx, txBldr)
+			prepareFlagsForTxCreateValidator(config, nodeID, ip, genDoc.ChainID, valPubKey)
+			createValidatorCmd := cli.GetCmdCreateValidator(cdc)
+
+			w, err := ioutil.TempFile("", "gentx")
 			if err != nil {
 				return err
 			}
-
-			// write the unsigned transaction to the buffer
-			w := bytes.NewBuffer([]byte{})
-			if err := utils.PrintUnsignedStdTx(w, txBldr, cliCtx, []sdk.Msg{msg}, true); err != nil {
+			unsignedGenTxFilename := w.Name()
+			defer os.Remove(unsignedGenTxFilename)
+			os.Stdout = w
+			if err = createValidatorCmd.RunE(nil, args); err != nil {
 				return err
 			}
+			w.Close()
 
-			// read the transaction
-			stdTx, err := readUnsignedGenTxFile(cdc, w)
-			if err != nil {
+			prepareFlagsForTxSign()
+			signCmd := authcmd.GetSignCommand(cdc, authcmd.GetAccountDecoder(cdc))
+			if w, err = prepareOutputFile(config.RootDir, nodeID); err != nil {
 				return err
 			}
-
-			// sign the transaction and write it to the output file
-			signedTx, err := utils.SignStdTx(txBldr, cliCtx, name, stdTx, false, true)
-			if err != nil {
-				return err
-			}
-
-			// Fetch output file name
-			outputDocument, err := makeOutputFilepath(config.RootDir, nodeID)
-			if err != nil {
-				return err
-			}
-
-			if err := writeSignedGenTx(cdc, outputDocument, signedTx); err != nil {
-				return err
-			}
-
-			fmt.Fprintf(os.Stderr, "Genesis transaction written to %q\n", outputDocument)
-			return nil
+			os.Stdout = w
+			return signCmd.RunE(nil, []string{unsignedGenTxFilename})
 		},
 	}
 
@@ -158,34 +102,6 @@ following delegation and commission default parameters:
 	cmd.Flags().AddFlagSet(cli.FsPk)
 	cmd.MarkFlagRequired(client.FlagName)
 	return cmd
-}
-
-func accountInGenesis(genesisState app.GenesisState, key sdk.AccAddress, coins sdk.Coins) error {
-	accountIsInGenesis := false
-	bondDenom := genesisState.StakeData.Params.BondDenom
-
-	// Check if the account is in genesis
-	for _, acc := range genesisState.Accounts {
-		// Ensure that account is in genesis
-		if acc.Address.Equals(key) {
-
-			// Ensure account contains enough funds of default bond denom
-			if coins.AmountOf(bondDenom).GT(acc.Coins.AmountOf(bondDenom)) {
-				return fmt.Errorf(
-					"Account %s is in genesis, but the only has %s%s available to stake, not %s%s",
-					key, acc.Coins.AmountOf(bondDenom), bondDenom, coins.AmountOf(bondDenom), bondDenom,
-				)
-			}
-			accountIsInGenesis = true
-			break
-		}
-	}
-
-	if accountIsInGenesis {
-		return nil
-	}
-
-	return fmt.Errorf("Account %s in not in the app_state.accounts array of genesis.json", key)
 }
 
 func prepareFlagsForTxCreateValidator(config *cfg.Config, nodeID, ip, chainID string,
@@ -215,35 +131,15 @@ func prepareFlagsForTxCreateValidator(config *cfg.Config, nodeID, ip, chainID st
 	}
 }
 
-func makeOutputFilepath(rootDir, nodeID string) (string, error) {
+func prepareFlagsForTxSign() {
+	viper.Set("offline", true)
+}
+
+func prepareOutputFile(rootDir, nodeID string) (w *os.File, err error) {
 	writePath := filepath.Join(rootDir, "config", "gentx")
-	if err := common.EnsureDir(writePath, 0700); err != nil {
-		return "", err
+	if err = common.EnsureDir(writePath, 0700); err != nil {
+		return
 	}
-	return filepath.Join(writePath, fmt.Sprintf("gentx-%v.json", nodeID)), nil
-}
-
-func readUnsignedGenTxFile(cdc *codec.Codec, r io.Reader) (auth.StdTx, error) {
-	var stdTx auth.StdTx
-	bytes, err := ioutil.ReadAll(r)
-	if err != nil {
-		return stdTx, err
-	}
-	err = cdc.UnmarshalJSON(bytes, &stdTx)
-	return stdTx, err
-}
-
-// nolint: errcheck
-func writeSignedGenTx(cdc *codec.Codec, outputDocument string, tx auth.StdTx) error {
-	outputFile, err := os.OpenFile(outputDocument, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
-	}
-	defer outputFile.Close()
-	json, err := cdc.MarshalJSON(tx)
-	if err != nil {
-		return err
-	}
-	_, err = fmt.Fprintf(outputFile, "%s\n", json)
-	return err
+	filename := filepath.Join(writePath, fmt.Sprintf("gentx-%v.json", nodeID))
+	return os.Create(filename)
 }

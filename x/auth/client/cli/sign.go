@@ -2,8 +2,9 @@ package cli
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 	"io/ioutil"
-	"os"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/context"
@@ -11,9 +12,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	authtxb "github.com/cosmos/cosmos-sdk/x/auth/client/txbuilder"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/tendermint/go-amino"
 )
 
@@ -22,11 +21,10 @@ const (
 	flagValidateSigs = "validate-signatures"
 	flagOffline      = "offline"
 	flagSigOnly      = "signature-only"
-	flagOutfile      = "output-document"
 )
 
 // GetSignCommand returns the sign command
-func GetSignCommand(codec *amino.Codec) *cobra.Command {
+func GetSignCommand(codec *amino.Codec, decoder auth.AccountDecoder) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "sign <file>",
 		Short: "Sign transactions generated offline",
@@ -43,7 +41,7 @@ order.
 The --offline flag makes sure that the client will not reach out to the local cache.
 Thus account number or sequence number lookups will not be performed and it is
 recommended to set such parameters manually.`,
-		RunE: makeSignCmd(codec),
+		RunE: makeSignCmd(codec, decoder),
 		Args: cobra.ExactArgs(1),
 	}
 	cmd.Flags().String(client.FlagName, "", "Name of private key with which to sign")
@@ -53,14 +51,10 @@ recommended to set such parameters manually.`,
 	cmd.Flags().Bool(flagValidateSigs, false, "Print the addresses that must sign the transaction, "+
 		"those who have already signed it, and make sure that signatures are in the correct order.")
 	cmd.Flags().Bool(flagOffline, false, "Offline mode. Do not query local cache.")
-	cmd.Flags().String(flagOutfile, "",
-		"The document will be written to the given file instead of STDOUT")
-
-	// Add the flags here and return the command
-	return client.PostCommands(cmd)[0]
+	return cmd
 }
 
-func makeSignCmd(cdc *amino.Codec) func(cmd *cobra.Command, args []string) error {
+func makeSignCmd(cdc *amino.Codec, decoder auth.AccountDecoder) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) (err error) {
 		stdTx, err := readAndUnmarshalStdTx(cdc, args[0])
 		if err != nil {
@@ -78,7 +72,7 @@ func makeSignCmd(cdc *amino.Codec) func(cmd *cobra.Command, args []string) error
 		if name == "" {
 			return errors.New("required flag \"name\" has not been set")
 		}
-		cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(cdc)
+		cliCtx := context.NewCLIContext().WithCodec(cdc).WithAccountDecoder(decoder)
 		txBldr := authtxb.NewTxBuilderFromCLI()
 
 		// if --signature-only is on, then override --append
@@ -110,20 +104,7 @@ func makeSignCmd(cdc *amino.Codec) func(cmd *cobra.Command, args []string) error
 		if err != nil {
 			return err
 		}
-
-		if viper.GetString(flagOutfile) == "" {
-			fmt.Printf("%s\n", json)
-			return
-		}
-
-		fp, err := os.OpenFile(
-			viper.GetString(flagOutfile), os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644,
-		)
-		if err != nil {
-			return err
-		}
-		defer fp.Close()
-		fmt.Fprintf(fp, "%s\n", json)
+		fmt.Printf("%s\n", json)
 		return
 	}
 }

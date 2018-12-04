@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	distr "github.com/cosmos/cosmos-sdk/x/distribution"
@@ -41,10 +42,8 @@ type GenesisState struct {
 	GenTxs       []json.RawMessage     `json:"gentxs"`
 }
 
-func NewGenesisState(accounts []GenesisAccount, authData auth.GenesisState,
-	stakeData stake.GenesisState, mintData mint.GenesisState,
-	distrData distr.GenesisState, govData gov.GenesisState,
-	slashingData slashing.GenesisState) GenesisState {
+func NewGenesisState(accounts []GenesisAccount, authData auth.GenesisState, stakeData stake.GenesisState, mintData mint.GenesisState,
+	distrData distr.GenesisState, govData gov.GenesisState, slashingData slashing.GenesisState) GenesisState {
 
 	return GenesisState{
 		Accounts:     accounts,
@@ -61,8 +60,8 @@ func NewGenesisState(accounts []GenesisAccount, authData auth.GenesisState,
 type GenesisAccount struct {
 	Address       sdk.AccAddress `json:"address"`
 	Coins         sdk.Coins      `json:"coins"`
-	Sequence      uint64         `json:"sequence_number"`
-	AccountNumber uint64         `json:"account_number"`
+	Sequence      int64          `json:"sequence_number"`
+	AccountNumber int64          `json:"account_number"`
 }
 
 func NewGenesisAccount(acc *auth.BaseAccount) GenesisAccount {
@@ -90,6 +89,14 @@ func (ga *GenesisAccount) ToAccount() (acc *auth.BaseAccount) {
 		Coins:         ga.Coins.Sort(),
 		AccountNumber: ga.AccountNumber,
 		Sequence:      ga.Sequence,
+	}
+}
+
+// get app init parameters for server init command
+func GaiaAppInit() server.AppInit {
+
+	return server.AppInit{
+		AppGenState: GaiaAppGenStateJSON,
 	}
 }
 
@@ -209,7 +216,6 @@ func CollectStdTxs(cdc *codec.Codec, moniker string, genTxsDir string, genDoc tm
 	if err := cdc.UnmarshalJSON(genDoc.AppState, &appState); err != nil {
 		return appGenTxs, persistentPeers, err
 	}
-
 	addrMap := make(map[string]GenesisAccount, len(appState.Accounts))
 	for i := 0; i < len(appState.Accounts); i++ {
 		acc := appState.Accounts[i]
@@ -258,17 +264,13 @@ func CollectStdTxs(cdc *codec.Codec, moniker string, genTxsDir string, genDoc tm
 		msg := msgs[0].(stake.MsgCreateValidator)
 		addr := string(sdk.AccAddress(msg.ValidatorAddr))
 		acc, ok := addrMap[addr]
-
 		if !ok {
 			return appGenTxs, persistentPeers, fmt.Errorf(
 				"account %v not in genesis.json: %+v", addr, addrMap)
 		}
-
 		if acc.Coins.AmountOf(msg.Delegation.Denom).LT(msg.Delegation.Amount) {
-			return appGenTxs, persistentPeers, fmt.Errorf(
-				"insufficient fund for delegation %v: %v < %v",
-				acc.Address, acc.Coins.AmountOf(msg.Delegation.Denom), msg.Delegation.Amount,
-			)
+			err = fmt.Errorf("insufficient fund for the delegation: %s < %s",
+				acc.Coins.AmountOf(msg.Delegation.Denom), msg.Delegation.Amount)
 		}
 
 		// exclude itself from persistent peers
@@ -285,13 +287,11 @@ func CollectStdTxs(cdc *codec.Codec, moniker string, genTxsDir string, genDoc tm
 
 func NewDefaultGenesisAccount(addr sdk.AccAddress) GenesisAccount {
 	accAuth := auth.NewBaseAccountWithAddress(addr)
-	coins := sdk.Coins{
-		sdk.NewCoin("fooToken", sdk.NewInt(1000)),
-		sdk.NewCoin(bondDenom, freeFermionsAcc),
+	coins :=sdk.Coins{
+		{"fooToken", sdk.NewInt(1000)},
+		{bondDenom, freeFermionsAcc},
 	}
-
 	coins.Sort()
-
 	accAuth.Coins = coins
 	return NewGenesisAccount(&accAuth)
 }

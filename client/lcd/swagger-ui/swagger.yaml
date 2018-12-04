@@ -209,14 +209,14 @@ paths:
       tags:
       - ICS0
       summary: Search transactions
-      description: Search transactions by tag(s).
+      description: Search transactions by tag
       produces:
       - application/json
       parameters:
       - in: query
         name: tag
         type: string
-        description: "transaction tags such as 'action=submit-proposal' and 'proposer=cosmos1g9ahr6xhht5rmqven628nklxluzyv8z9jqjcmc' which results in the following endpoint: 'GET /txs?action=submit-proposal&proposer=cosmos1g9ahr6xhht5rmqven628nklxluzyv8z9jqjcmc'"
+        description: "transaction tag, for instance: sender_bech32=`'cosmos1g9ahr6xhht5rmqven628nklxluzyv8z9jqjcmc'`"
         required: true
       - in: query
         name: page
@@ -228,7 +228,7 @@ paths:
         type: integer
       responses:
         200:
-          description: All txs matching the provided tags
+          description: All Tx matching the provided tags
           schema:
             type: array
             items:
@@ -1226,8 +1226,8 @@ paths:
         required: false
         type: string
       - in: query
-        name: depositor
-        description: depositor address
+        name: depositer
+        description: depositer address
         required: false
         type: string
       - in: query
@@ -1281,7 +1281,7 @@ paths:
           properties:
             base_req:
               "$ref": "#/definitions/BaseReq"
-            depositor:
+            depositer:
               "$ref": "#/definitions/Address"
             amount:
               type: array
@@ -1317,29 +1317,6 @@ paths:
             type: array
             items:
               "$ref": "#/definitions/Deposit"
-        400:
-          description: Invalid proposal id
-        500:
-          description: Internal Server Error
-  /gov/proposals/{proposalId}/tally:
-    get:
-      summary: Get a proposal's tally result at the current time
-      description: Gets a proposal's tally result at the current time. If the proposal is pending deposits (i.e status 'DepositPeriod') it returns an empty tally result.
-      produces:
-      - application/json
-      tags:
-      - ICS22
-      parameters:
-      - type: string
-        description: proposal id
-        name: proposalId
-        required: true
-        in: path
-      responses:
-        200:
-          description: OK
-          schema:
-            $ref: "#/definitions/TallyResult"
         400:
           description: Invalid proposal id
         500:
@@ -1441,10 +1418,10 @@ paths:
           description: Invalid proposal id
         500:
           description: Internal Server Error
-  /gov/proposals/{proposalId}/deposits/{depositor}:
+  /gov/proposals/{proposalId}/deposits/{depositer}:
     get:
       summary: Query deposit
-      description: Query deposit by proposalId and depositor address
+      description: Query deposit by proposalId and depositer address
       produces:
       - application/json
       tags:
@@ -1456,8 +1433,8 @@ paths:
         required: true
         in: path
       - type: string
-        description: Bech32 depositor address
-        name: depositor
+        description: Bech32 depositer address
+        name: depositer
         required: true
         in: path
       responses:
@@ -1466,7 +1443,7 @@ paths:
           schema:
             $ref: "#/definitions/Deposit"
         400:
-          description: Invalid proposal id or depositor address
+          description: Invalid proposal id or depositer address
         404:
           description: Found no deposit
         500:
@@ -1916,7 +1893,16 @@ definitions:
       proposal_status:
         type: string
       tally_result:
-         $ref: "#/definitions/TallyResult"
+        type: object
+        properties:
+          yes:
+            type: string
+          abstain:
+            type: string
+          no:
+            type: string
+          no_with_veto:
+            type: string
       submit_time:
         type: string
       total_deposit:
@@ -1934,23 +1920,8 @@ definitions:
           "$ref": "#/definitions/Coin"
       proposal_id:
         type: integer
-      depositor:
+      depositer:
         "$ref": "#/definitions/Address"
-  TallyResult:
-    type: object
-    properties:
-      yes:
-        type: string
-        example: "0.0000000000"
-      abstain:
-        type: string
-        example: "0.0000000000"
-      no:
-        type: string
-        example: "0.0000000000"
-      no_with_veto:
-        type: string
-        example: "0.0000000000"
   Vote:
     type: object
     properties:

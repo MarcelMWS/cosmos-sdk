@@ -2,7 +2,6 @@ package types
 
 import (
 	"encoding/json"
-	"math"
 	"testing"
 
 	"math/big"
@@ -322,11 +321,11 @@ func NewUint(n uint64) Uint {
 
 // NewUintFromBigUint constructs Uint from big.Uint
 func NewUintFromBigInt(i *big.Int) Uint {
-	res := Uint{i}
-	if UintOverflow(res) {
+	// Check overflow
+	if i.Sign() == -1 || i.Sign() == 1 && i.BitLen() > 256 {
 		panic("Uint overflow")
 	}
-	return res
+	return Uint{i}
 }
 
 // NewUintFromString constructs Uint from string
@@ -353,12 +352,11 @@ func NewUintWithDecimal(n uint64, dec int) Uint {
 	i := new(big.Int)
 	i.Mul(new(big.Int).SetUint64(n), exp)
 
-	res := Uint{i}
-	if UintOverflow(res) {
+	// Check overflow
+	if i.Sign() == -1 || i.Sign() == 1 && i.BitLen() > 256 {
 		panic("NewUintWithDecimal() out of bound")
 	}
-
-	return res
+	return Uint{i}
 }
 
 // ZeroUint returns Uint value with zero
@@ -409,7 +407,8 @@ func (i Uint) LT(i2 Uint) bool {
 // Add adds Uint from another
 func (i Uint) Add(i2 Uint) (res Uint) {
 	res = Uint{add(i.i, i2.i)}
-	if UintOverflow(res) {
+	// Check overflow
+	if res.Sign() == -1 || res.Sign() == 1 && res.i.BitLen() > 256 {
 		panic("Uint overflow")
 	}
 	return
@@ -423,21 +422,11 @@ func (i Uint) AddRaw(i2 uint64) Uint {
 // Sub subtracts Uint from another
 func (i Uint) Sub(i2 Uint) (res Uint) {
 	res = Uint{sub(i.i, i2.i)}
-	if UintOverflow(res) {
+	// Check overflow
+	if res.Sign() == -1 || res.Sign() == 1 && res.i.BitLen() > 256 {
 		panic("Uint overflow")
 	}
 	return
-}
-
-// SafeSub attempts to subtract one Uint from another. A boolean is also returned
-// indicating if the result contains integer overflow.
-func (i Uint) SafeSub(i2 Uint) (Uint, bool) {
-	res := Uint{sub(i.i, i2.i)}
-	if UintOverflow(res) {
-		return res, true
-	}
-
-	return res, false
 }
 
 // SubRaw subtracts uint64 from Uint
@@ -447,15 +436,15 @@ func (i Uint) SubRaw(i2 uint64) Uint {
 
 // Mul multiples two Uints
 func (i Uint) Mul(i2 Uint) (res Uint) {
+	// Check overflow
 	if i.i.BitLen()+i2.i.BitLen()-1 > 256 {
 		panic("Uint overflow")
 	}
-
 	res = Uint{mul(i.i, i2.i)}
-	if UintOverflow(res) {
+	// Check overflow
+	if res.Sign() == -1 || res.Sign() == 1 && res.i.BitLen() > 256 {
 		panic("Uint overflow")
 	}
-
 	return
 }
 
@@ -539,22 +528,6 @@ func (i *Uint) UnmarshalJSON(bz []byte) error {
 }
 
 //__________________________________________________________________________
-
-// UintOverflow returns true if a given unsigned integer overflows and false
-// otherwise.
-func UintOverflow(x Uint) bool {
-	return x.i.Sign() == -1 || x.i.Sign() == 1 && x.i.BitLen() > 256
-}
-
-// AddUint64Overflow performs the addition operation on two uint64 integers and
-// returns a boolean on whether or not the result overflows.
-func AddUint64Overflow(a, b uint64) (uint64, bool) {
-	if math.MaxUint64-a < b {
-		return 0, true
-	}
-
-	return a + b, false
-}
 
 // intended to be used with require/assert:  require.True(IntEq(...))
 func IntEq(t *testing.T, exp, got Int) (*testing.T, bool, string, string, string) {
