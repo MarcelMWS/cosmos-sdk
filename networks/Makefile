@@ -4,7 +4,7 @@
 ### The shell scripts in this folder are example uses of the targets.
 
 # Name of the testnet. Used in chain-id.
-TESTNET_NAME?=remotenet
+TESTNET_NAME?=cosmoshub-2
 
 # Name of the servers grouped together for management purposes. Used in tagging the servers in the cloud.
 CLUSTER_NAME?=$(TESTNET_NAME)
@@ -24,9 +24,9 @@ GENESISFILE?=$(CURDIR)/../build/genesis.json
 CONFIGFILE?=$(CURDIR)/../build/config.toml
 
 # Name of application for app deployments
-APP_NAME ?= faucettestnet1
+APP_NAME ?= gaiad
 # Region to deploy VPC and application in AWS
-REGION ?= us-east-2
+REGION ?= eu-central-1c
 
 all:
 	@echo "There is no all. Only sum of the ones."
@@ -43,7 +43,6 @@ extract-config: disclaimer
 	cd remote/ansible && \
 	ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook \
 		-i inventory/ec2.py \
-		-l "tag_Environment_$(CLUSTER_NAME)" \
 		-b -u centos \
 		-e TESTNET_NAME="$(TESTNET_NAME)" \
 		-e GENESISFILE="$(GENESISFILE)" \
