@@ -3,9 +3,9 @@ package cli
 import (
 	"github.com/spf13/cobra"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/types"
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/x/auth/types"
 )
 
 // GetTxCmd returns the transaction commands for this module

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Proposal defines a struct used by the governance module to allow for voting

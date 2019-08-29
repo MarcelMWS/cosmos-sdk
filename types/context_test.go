@@ -13,8 +13,8 @@ import (
 
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"github.com/cosmos/cosmos-sdk/store"
+	"github.com/cosmos/cosmos-sdk/types"
 )
 
 type MockLogger struct {

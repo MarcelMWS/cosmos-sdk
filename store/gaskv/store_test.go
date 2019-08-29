@@ -6,9 +6,9 @@ import (
 
 	dbm "github.com/tendermint/tm-db"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/dbadapter"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/gaskv"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/types"
+	"github.com/cosmos/cosmos-sdk/store/dbadapter"
+	"github.com/cosmos/cosmos-sdk/store/gaskv"
+	"github.com/cosmos/cosmos-sdk/store/types"
 
 	"github.com/stretchr/testify/require"
 )

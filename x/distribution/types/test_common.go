@@ -4,7 +4,7 @@ import (
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/ed25519"
 
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // nolint: deadcode unused

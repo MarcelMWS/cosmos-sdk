@@ -1,7 +1,7 @@
 package types
 
 import (
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/params"
+	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
 const (

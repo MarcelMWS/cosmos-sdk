@@ -7,15 +7,15 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/version"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/client/utils"
-	govutils "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/gov/client/utils"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/gov/types"
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/version"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
+	govutils "github.com/cosmos/cosmos-sdk/x/gov/client/utils"
+	"github.com/cosmos/cosmos-sdk/x/gov/types"
 )
 
 // Proposal flags

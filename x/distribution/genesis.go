@@ -3,8 +3,8 @@ package distribution
 import (
 	"fmt"
 
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/distribution/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 )
 
 // InitGenesis sets distribution information for genesis

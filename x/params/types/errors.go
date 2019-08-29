@@ -3,7 +3,7 @@ package types
 import (
 	"fmt"
 
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Param module codespace constants

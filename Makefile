@@ -65,7 +65,7 @@ distclean:
 ### Documentation
 
 godocs:
-	@echo "--> Wait a few seconds and visit http://localhost:6060/pkg/repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	@echo "--> Wait a few seconds and visit http://localhost:6060/pkg/github.com/cosmos/cosmos-sdk/types"
 	godoc -http=:6060
 
 ########################################
@@ -74,10 +74,10 @@ godocs:
 test: test_unit
 
 test_ledger_mock:
-	@go test -mod=readonly `go list repo.mwaysolutions.com/blockscape/gaia-yubihsm/crypto` -tags='cgo ledger test_ledger_mock'
+	@go test -mod=readonly `go list github.com/cosmos/cosmos-sdk/crypto` -tags='cgo ledger test_ledger_mock'
 
 test_ledger: test_ledger_mock
-	@go test -mod=readonly -v `go list repo.mwaysolutions.com/blockscape/gaia-yubihsm/crypto` -tags='cgo ledger'
+	@go test -mod=readonly -v `go list github.com/cosmos/cosmos-sdk/crypto` -tags='cgo ledger'
 
 test_unit:
 	@VERSION=$(VERSION) go test -mod=readonly $(PACKAGES_NOSIMULATION) -tags='ledger test_ledger_mock'

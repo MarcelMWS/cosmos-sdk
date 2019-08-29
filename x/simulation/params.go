@@ -5,8 +5,8 @@ import (
 	"math/rand"
 	"time"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // nolint

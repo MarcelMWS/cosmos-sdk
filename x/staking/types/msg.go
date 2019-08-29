@@ -6,7 +6,7 @@ import (
 
 	"github.com/tendermint/tendermint/crypto"
 
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // ensure Msg interface compliance at compile time

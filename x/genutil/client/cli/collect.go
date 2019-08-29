@@ -9,11 +9,11 @@ import (
 	"github.com/tendermint/tendermint/libs/cli"
 	tmtypes "github.com/tendermint/tendermint/types"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/server"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/genutil"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/genutil/types"
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/server"
+	"github.com/cosmos/cosmos-sdk/x/genutil"
+	"github.com/cosmos/cosmos-sdk/x/genutil/types"
 )
 
 const flagGenTxDir = "gentx-dir"

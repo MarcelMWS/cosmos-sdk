@@ -7,12 +7,12 @@ import (
 	"github.com/spf13/viper"
 	"github.com/tendermint/tendermint/libs/cli"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/keys"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/server"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/genaccounts"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/genutil"
+	"github.com/cosmos/cosmos-sdk/client/keys"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/server"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/genaccounts"
+	"github.com/cosmos/cosmos-sdk/x/genutil"
 )
 
 const (

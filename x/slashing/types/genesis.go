@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // GenesisState - all slashing state that must be provided at genesis

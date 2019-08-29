@@ -11,9 +11,9 @@ import (
 	"github.com/tendermint/tendermint/crypto/multisig"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/types"
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/types"
 )
 
 var (

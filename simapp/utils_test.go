@@ -9,20 +9,20 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/tendermint/tendermint/crypto/ed25519"
 	cmn "github.com/tendermint/tendermint/libs/common"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/distribution"
-	distr "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/distribution"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/gov"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/mint"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/slashing"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/staking"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/supply"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/distribution"
+	distr "github.com/cosmos/cosmos-sdk/x/distribution"
+	"github.com/cosmos/cosmos-sdk/x/gov"
+	"github.com/cosmos/cosmos-sdk/x/mint"
+	"github.com/cosmos/cosmos-sdk/x/slashing"
+	"github.com/cosmos/cosmos-sdk/x/staking"
+	"github.com/cosmos/cosmos-sdk/x/supply"
 
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 var (

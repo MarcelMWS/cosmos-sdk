@@ -11,10 +11,10 @@ import (
 	"github.com/tendermint/tendermint/crypto/multisig"
 	"github.com/tendermint/tendermint/libs/cli"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/flags"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/crypto"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/crypto/keys"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/crypto"
+	"github.com/cosmos/cosmos-sdk/crypto/keys"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 const (

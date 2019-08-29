@@ -12,9 +12,9 @@ import (
 	"github.com/tendermint/tendermint/libs/cli"
 	"github.com/tendermint/tendermint/libs/log"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/server"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/tests"
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/server"
+	"github.com/cosmos/cosmos-sdk/tests"
 )
 
 func setupCmd(genesisTime string, chainId string) *cobra.Command {

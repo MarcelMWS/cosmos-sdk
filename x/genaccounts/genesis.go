@@ -1,10 +1,10 @@
 package genaccounts
 
 import (
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	authexported "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/exported"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/genaccounts/internal/types"
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	authexported "github.com/cosmos/cosmos-sdk/x/auth/exported"
+	"github.com/cosmos/cosmos-sdk/x/genaccounts/internal/types"
 )
 
 // InitGenesis initializes accounts and deliver genesis transactions

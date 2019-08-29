@@ -1,19 +1,19 @@
 package v036
 
 import (
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
-	v034auth "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/legacy/v0_34"
-	v036auth "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/legacy/v0_36"
-	v034distr "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/distribution/legacy/v0_34"
-	v036distr "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/distribution/legacy/v0_36"
-	v034genAccounts "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/genaccounts/legacy/v0_34"
-	v036genAccounts "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/genaccounts/legacy/v0_36"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/genutil"
-	v034gov "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/gov/legacy/v0_34"
-	v036gov "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/gov/legacy/v0_36"
-	v034staking "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/staking/legacy/v0_34"
-	v036staking "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/staking/legacy/v0_36"
-	v036supply "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/supply/legacy/v0_36"
+	"github.com/cosmos/cosmos-sdk/codec"
+	v034auth "github.com/cosmos/cosmos-sdk/x/auth/legacy/v0_34"
+	v036auth "github.com/cosmos/cosmos-sdk/x/auth/legacy/v0_36"
+	v034distr "github.com/cosmos/cosmos-sdk/x/distribution/legacy/v0_34"
+	v036distr "github.com/cosmos/cosmos-sdk/x/distribution/legacy/v0_36"
+	v034genAccounts "github.com/cosmos/cosmos-sdk/x/genaccounts/legacy/v0_34"
+	v036genAccounts "github.com/cosmos/cosmos-sdk/x/genaccounts/legacy/v0_36"
+	"github.com/cosmos/cosmos-sdk/x/genutil"
+	v034gov "github.com/cosmos/cosmos-sdk/x/gov/legacy/v0_34"
+	v036gov "github.com/cosmos/cosmos-sdk/x/gov/legacy/v0_36"
+	v034staking "github.com/cosmos/cosmos-sdk/x/staking/legacy/v0_34"
+	v036staking "github.com/cosmos/cosmos-sdk/x/staking/legacy/v0_36"
+	v036supply "github.com/cosmos/cosmos-sdk/x/supply/legacy/v0_36"
 )
 
 // Migrate migrates exported state from v0.34 to a v0.36 genesis state.

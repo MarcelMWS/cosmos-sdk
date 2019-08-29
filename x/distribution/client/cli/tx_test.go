@@ -6,11 +6,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/client/utils"
+	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 )
 
 func createFakeTxBuilder() auth.TxBuilder {

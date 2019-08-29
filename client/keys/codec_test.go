@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/crypto/keys"
+	"github.com/cosmos/cosmos-sdk/crypto/keys"
 )
 
 type testCases struct {

@@ -5,10 +5,10 @@ import (
 	"io"
 	"sync"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/cachekv"
-	serrors "repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/errors"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/tracekv"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/types"
+	"github.com/cosmos/cosmos-sdk/store/cachekv"
+	serrors "github.com/cosmos/cosmos-sdk/store/errors"
+	"github.com/cosmos/cosmos-sdk/store/tracekv"
+	"github.com/cosmos/cosmos-sdk/store/types"
 
 	"github.com/pkg/errors"
 	"github.com/tendermint/iavl"

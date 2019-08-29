@@ -1,7 +1,7 @@
 package keys
 
 import (
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
+	"github.com/cosmos/cosmos-sdk/codec"
 )
 
 var cdc *codec.Codec

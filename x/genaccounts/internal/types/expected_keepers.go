@@ -1,8 +1,8 @@
 package types
 
 import (
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	authexported "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/exported"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	authexported "github.com/cosmos/cosmos-sdk/x/auth/exported"
 )
 
 // AccountKeeper defines the expected account keeper (noalias)

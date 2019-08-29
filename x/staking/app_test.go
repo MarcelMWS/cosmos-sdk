@@ -6,13 +6,13 @@ import (
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/bank"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/mock"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/staking/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/supply"
-	supplyexported "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/supply/exported"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/bank"
+	"github.com/cosmos/cosmos-sdk/x/mock"
+	"github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/cosmos/cosmos-sdk/x/supply"
+	supplyexported "github.com/cosmos/cosmos-sdk/x/supply/exported"
 )
 
 // getMockApp returns an initialized mock application for this module.

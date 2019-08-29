@@ -7,14 +7,14 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/flags"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/types/rest"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/client/utils"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/types"
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/rest"
+	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
+	"github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	tmtypes "github.com/tendermint/tendermint/types"
 )

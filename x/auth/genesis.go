@@ -1,7 +1,7 @@
 package auth
 
 import (
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // InitGenesis - Init store state from genesis data

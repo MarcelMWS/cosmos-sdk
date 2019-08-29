@@ -8,9 +8,9 @@ import (
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	authtypes "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/bank/internal/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/cosmos/cosmos-sdk/x/bank/internal/types"
 )
 
 func TestBalances(t *testing.T) {

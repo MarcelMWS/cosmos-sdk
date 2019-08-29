@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"strings"
 
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth"
-	authexported "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/exported"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/supply"
-	supplyexported "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/supply/exported"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	authexported "github.com/cosmos/cosmos-sdk/x/auth/exported"
+	"github.com/cosmos/cosmos-sdk/x/supply"
+	supplyexported "github.com/cosmos/cosmos-sdk/x/supply/exported"
 )
 
 // GenesisAccount is a struct for account initialization used exclusively during genesis

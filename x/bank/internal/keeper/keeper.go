@@ -6,10 +6,10 @@ import (
 
 	"github.com/tendermint/tendermint/libs/log"
 
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/exported"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/bank/internal/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/params"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/exported"
+	"github.com/cosmos/cosmos-sdk/x/bank/internal/types"
+	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
 var _ Keeper = (*BaseKeeper)(nil)

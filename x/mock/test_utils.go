@@ -5,14 +5,14 @@ import (
 	"math/rand"
 	"testing"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
+	"github.com/cosmos/cosmos-sdk/codec"
 
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/baseapp"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"github.com/cosmos/cosmos-sdk/baseapp"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // BigInterval is a representation of the interval [lo, hi), where

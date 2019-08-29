@@ -1,7 +1,7 @@
 package types
 
 import (
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
+	"github.com/cosmos/cosmos-sdk/codec"
 )
 
 // Register concrete types on codec codec

@@ -1,8 +1,8 @@
 package v0_36
 
 import (
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	v034distr "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/distribution/legacy/v0_34"
+	"github.com/cosmos/cosmos-sdk/types"
+	v034distr "github.com/cosmos/cosmos-sdk/x/distribution/legacy/v0_34"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"testing"
 

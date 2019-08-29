@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/keys"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/server"
+	"github.com/cosmos/cosmos-sdk/client/keys"
+	"github.com/cosmos/cosmos-sdk/server"
 )
 
 func TestGenerateCoinKey(t *testing.T) {

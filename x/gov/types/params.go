@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	params "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/params/subspace"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	params "github.com/cosmos/cosmos-sdk/x/params/subspace"
 )
 
 // Parameter store key

@@ -11,8 +11,8 @@ import (
 	cmn "github.com/tendermint/tendermint/libs/common"
 	dbm "github.com/tendermint/tm-db"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/errors"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/types"
+	"github.com/cosmos/cosmos-sdk/store/errors"
+	"github.com/cosmos/cosmos-sdk/store/types"
 )
 
 var (

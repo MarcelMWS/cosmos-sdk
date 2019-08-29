@@ -3,9 +3,9 @@ package common
 import (
 	"fmt"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/distribution/types"
+	"github.com/cosmos/cosmos-sdk/client/context"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 )
 
 // QueryParams actually queries distribution params.

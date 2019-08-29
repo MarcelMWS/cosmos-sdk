@@ -5,10 +5,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/flags"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/client/utils"
+	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
 )
 
 // txEncodeRespStr implements a simple Stringer wrapper for a encoded tx.

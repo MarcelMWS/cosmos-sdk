@@ -1,8 +1,8 @@
 package v0_36
 
 import (
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	v034auth "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/legacy/v0_34"
+	"github.com/cosmos/cosmos-sdk/types"
+	v034auth "github.com/cosmos/cosmos-sdk/x/auth/legacy/v0_34"
 	"testing"
 
 	"github.com/stretchr/testify/require"

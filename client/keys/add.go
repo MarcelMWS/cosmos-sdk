@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"sort"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/flags"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/input"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/crypto/keys"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/client/input"
+	"github.com/cosmos/cosmos-sdk/crypto/keys"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

@@ -17,11 +17,11 @@ import (
 	tmliteProxy "github.com/tendermint/tendermint/lite/proxy"
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/flags"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/keys"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
-	cryptokeys "repo.mwaysolutions.com/blockscape/gaia-yubihsm/crypto/keys"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/client/keys"
+	"github.com/cosmos/cosmos-sdk/codec"
+	cryptokeys "github.com/cosmos/cosmos-sdk/crypto/keys"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 var (

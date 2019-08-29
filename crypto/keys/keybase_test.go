@@ -10,9 +10,9 @@ import (
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/ed25519"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/crypto/keys/hd"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/crypto/keys/mintkey"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/hd"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/mintkey"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func init() {

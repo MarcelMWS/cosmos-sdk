@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
+	"github.com/cosmos/cosmos-sdk/codec"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/types"
+	"github.com/cosmos/cosmos-sdk/store/types"
 )
 
 // Key for the length of the list

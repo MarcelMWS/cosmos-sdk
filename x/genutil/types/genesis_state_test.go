@@ -6,9 +6,9 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tendermint/tendermint/crypto/ed25519"
 
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	authtypes "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/types"
-	stakingtypes "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/staking/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
 var (

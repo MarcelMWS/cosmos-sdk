@@ -3,10 +3,10 @@ package keeper
 import (
 	"fmt"
 
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/distribution/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/staking/exported"
+	"github.com/cosmos/cosmos-sdk/x/distribution/types"
+	"github.com/cosmos/cosmos-sdk/x/staking/exported"
 )
 
 // initialize rewards for a new validator

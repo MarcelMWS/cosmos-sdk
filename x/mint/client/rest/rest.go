@@ -3,7 +3,7 @@ package rest
 import (
 	"github.com/gorilla/mux"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
+	"github.com/cosmos/cosmos-sdk/client/context"
 )
 
 // RegisterRoutes registers minting module REST handlers on the provided router.

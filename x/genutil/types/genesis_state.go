@@ -8,9 +8,9 @@ import (
 	"github.com/tendermint/tendermint/libs/common"
 	tmtypes "github.com/tendermint/tendermint/types"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
-	authtypes "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/types"
-	stakingtypes "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/staking/types"
+	"github.com/cosmos/cosmos-sdk/codec"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
 // GenesisState defines the raw genesis transaction in JSON

@@ -3,14 +3,14 @@ package rest
 import (
 	"net/http"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/types/rest"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/client/utils"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/gov"
-	govrest "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/gov/client/rest"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/params"
-	paramscutils "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/params/client/utils"
+	"github.com/cosmos/cosmos-sdk/client/context"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/rest"
+	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
+	"github.com/cosmos/cosmos-sdk/x/gov"
+	govrest "github.com/cosmos/cosmos-sdk/x/gov/client/rest"
+	"github.com/cosmos/cosmos-sdk/x/params"
+	paramscutils "github.com/cosmos/cosmos-sdk/x/params/client/utils"
 )
 
 // ProposalRESTHandler returns a ProposalRESTHandler that exposes the param

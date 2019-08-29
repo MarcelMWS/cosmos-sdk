@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"fmt"
 
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // An sdk.Tx which is its own sdk.Msg.

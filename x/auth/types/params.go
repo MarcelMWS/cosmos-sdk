@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/params/subspace"
+	"github.com/cosmos/cosmos-sdk/x/params/subspace"
 )
 
 // DefaultParamspace defines the default auth module parameter subspace

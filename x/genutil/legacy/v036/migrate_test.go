@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/genutil"
+	"github.com/cosmos/cosmos-sdk/x/genutil"
 )
 
 var basic034Gov = []byte(`

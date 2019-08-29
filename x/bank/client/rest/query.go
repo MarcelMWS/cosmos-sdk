@@ -5,10 +5,10 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/types/rest"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/bank/internal/types"
+	"github.com/cosmos/cosmos-sdk/client/context"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/rest"
+	"github.com/cosmos/cosmos-sdk/x/bank/internal/types"
 )
 
 // query accountREST Handler

@@ -6,8 +6,8 @@ import (
 	"sort"
 	"time"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/baseapp"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"github.com/cosmos/cosmos-sdk/baseapp"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Operation runs a state machine transition, and ensures the transition

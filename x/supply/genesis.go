@@ -1,9 +1,9 @@
 package supply
 
 import (
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	autypes "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/supply/internal/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	autypes "github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/supply/internal/types"
 )
 
 // InitGenesis sets supply information for genesis.

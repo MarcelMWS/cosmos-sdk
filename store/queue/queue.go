@@ -3,10 +3,10 @@ package store
 // TODO: make it independent from list
 /*
 import (
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/list"
+	"github.com/cosmos/cosmos-sdk/store/list"
 )
 
 // Key for the top element position in the queue

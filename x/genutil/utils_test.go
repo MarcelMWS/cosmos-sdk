@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/tests"
+	"github.com/cosmos/cosmos-sdk/tests"
 
 	"github.com/stretchr/testify/require"
 )

@@ -7,9 +7,9 @@ import (
 
 	"github.com/tendermint/tendermint/crypto"
 
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	authtypes "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/supply/exported"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/cosmos/cosmos-sdk/x/supply/exported"
 )
 
 var _ exported.ModuleAccountI = (*ModuleAccount)(nil)

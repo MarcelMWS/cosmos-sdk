@@ -3,10 +3,10 @@ package keeper
 import (
 	"fmt"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/distribution/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/params"
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/distribution/types"
+	"github.com/cosmos/cosmos-sdk/x/params"
 
 	"github.com/tendermint/tendermint/libs/log"
 )

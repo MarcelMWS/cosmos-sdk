@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/flags"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 )
 
 const (

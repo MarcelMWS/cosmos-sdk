@@ -9,9 +9,9 @@ import (
 	tmcrypto "github.com/tendermint/tendermint/crypto"
 	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/crypto/keys/hd"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/tests"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/hd"
+	"github.com/cosmos/cosmos-sdk/tests"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func TestLedgerErrorHandling(t *testing.T) {

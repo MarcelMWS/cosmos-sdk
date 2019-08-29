@@ -1,7 +1,7 @@
 package bank
 
 import (
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // GenesisState is the bank state that must be provided at genesis.

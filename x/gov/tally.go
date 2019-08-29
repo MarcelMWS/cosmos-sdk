@@ -1,9 +1,9 @@
 package gov
 
 import (
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/gov/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/staking/exported"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/gov/types"
+	"github.com/cosmos/cosmos-sdk/x/staking/exported"
 )
 
 // validatorGovInfo used for tallying

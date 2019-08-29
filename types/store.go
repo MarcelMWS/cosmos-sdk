@@ -3,7 +3,7 @@ package types
 import (
 	cmn "github.com/tendermint/tendermint/libs/common"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/types"
+	"github.com/cosmos/cosmos-sdk/store/types"
 )
 
 // nolint - reexport

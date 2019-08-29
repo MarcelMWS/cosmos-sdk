@@ -10,10 +10,10 @@ import (
 
 	dbm "github.com/tendermint/tm-db"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/dbadapter"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/prefix"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/tracekv"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/types"
+	"github.com/cosmos/cosmos-sdk/store/dbadapter"
+	"github.com/cosmos/cosmos-sdk/store/prefix"
+	"github.com/cosmos/cosmos-sdk/store/tracekv"
+	"github.com/cosmos/cosmos-sdk/store/types"
 )
 
 func bz(s string) []byte { return []byte(s) }

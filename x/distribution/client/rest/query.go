@@ -6,12 +6,12 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/distribution/client/common"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/distribution/types"
+	"github.com/cosmos/cosmos-sdk/x/distribution/client/common"
+	"github.com/cosmos/cosmos-sdk/x/distribution/types"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/types/rest"
+	"github.com/cosmos/cosmos-sdk/client/context"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/rest"
 )
 
 func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router, queryRoute string) {

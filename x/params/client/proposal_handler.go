@@ -1,9 +1,9 @@
 package client
 
 import (
-	govclient "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/gov/client"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/params/client/cli"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/params/client/rest"
+	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
+	"github.com/cosmos/cosmos-sdk/x/params/client/cli"
+	"github.com/cosmos/cosmos-sdk/x/params/client/rest"
 )
 
 // param change proposal handler

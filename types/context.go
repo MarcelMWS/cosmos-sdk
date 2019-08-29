@@ -8,8 +8,8 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/gaskv"
-	stypes "repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/types"
+	"github.com/cosmos/cosmos-sdk/store/gaskv"
+	stypes "github.com/cosmos/cosmos-sdk/store/types"
 )
 
 /*

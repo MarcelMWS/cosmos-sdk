@@ -8,7 +8,7 @@ import (
 	bip39 "github.com/bartekn/go-bip39"
 	"github.com/spf13/cobra"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/input"
+	"github.com/cosmos/cosmos-sdk/client/input"
 )
 
 const (

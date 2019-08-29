@@ -7,12 +7,12 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/types/rest"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/client/utils"
-	gcutils "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/gov/client/utils"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/gov/types"
+	"github.com/cosmos/cosmos-sdk/client/context"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/rest"
+	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
+	gcutils "github.com/cosmos/cosmos-sdk/x/gov/client/utils"
+	"github.com/cosmos/cosmos-sdk/x/gov/types"
 )
 
 // REST Variable names

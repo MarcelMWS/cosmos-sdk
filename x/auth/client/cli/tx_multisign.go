@@ -12,14 +12,14 @@ import (
 	"github.com/tendermint/tendermint/crypto/multisig"
 	"github.com/tendermint/tendermint/libs/cli"
 
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/flags"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/keys"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
-	crkeys "repo.mwaysolutions.com/blockscape/gaia-yubihsm/crypto/keys"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/version"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/client/utils"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/types"
+	"github.com/cosmos/cosmos-sdk/client/context"
+	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/client/keys"
+	"github.com/cosmos/cosmos-sdk/codec"
+	crkeys "github.com/cosmos/cosmos-sdk/crypto/keys"
+	"github.com/cosmos/cosmos-sdk/version"
+	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
+	"github.com/cosmos/cosmos-sdk/x/auth/types"
 )
 
 // GetSignCommand returns the sign command

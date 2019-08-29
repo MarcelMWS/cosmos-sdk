@@ -6,9 +6,9 @@ import (
 
 	"github.com/tendermint/tendermint/libs/log"
 
-	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/crisis/internal/types"
-	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/params"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/crisis/internal/types"
+	"github.com/cosmos/cosmos-sdk/x/params"
 )
 
 // Keeper - crisis keeper
