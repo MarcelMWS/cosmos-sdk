@@ -1,18 +1,21 @@
 package server
 
 import (
+	"errors"
 	"fmt"
+	"os"
+	"strconv"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
 	"github.com/tendermint/tendermint/abci/server"
-
+	"github.com/certusone/aiakos"
 	tcmd "github.com/tendermint/tendermint/cmd/tendermint/commands"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	"github.com/tendermint/tendermint/node"
 	"github.com/tendermint/tendermint/p2p"
-	pvm "github.com/tendermint/tendermint/privval"
+	// pvm "github.com/tendermint/tendermint/privval"
 	"github.com/tendermint/tendermint/proxy"
 )
 
@@ -125,10 +128,52 @@ func startInProcess(ctx *Context, appCreator AppCreator) (*node.Node, error) {
 	}
 
 	UpgradeOldPrivValFile(cfg)
+	if os.Getenv("AIAKOS_URL") == "" {
+		return nil, errors.New("no Aiakos hsm url specified. Please set AIAKOS_URL in the format host:port")
+	}
+	aiakosUrl := os.Getenv("AIAKOS_URL")
+	if os.Getenv("AIAKOS_SIGNING_KEY") == "" {
+		return nil, errors.New("no Aiakos signing key ID specified. Please set AIAKOS_SIGNING_KEY")
+	}
+	aiakosSigningKey, err := strconv.ParseUint(os.Getenv("AIAKOS_SIGNING_KEY"), 10, 16)
+	if err != nil {
+		return nil, errors.New("invalid Aiakos signing key ID.")
+	}
+	if os.Getenv("AIAKOS_AUTH_KEY") == "" {
+		return nil, errors.New("no Aiakos auth key ID specified. Please set AIAKOS_AUTH_KEY")
+	}
+	aiakosAuthKey, err := strconv.ParseUint(os.Getenv("AIAKOS_AUTH_KEY"), 10, 16)
+	if err != nil {
+		return nil, errors.New("invalid Aiakos auth key ID.")
+	}
+	if os.Getenv("AIAKOS_AUTH_KEY_PASSWORD") == "" {
+		return nil, errors.New("no Aiakos auth key password specified. Please set AIAKOS_AUTH_KEY_PASSWORD")
+	}
+	aiakosAuthPassword := os.Getenv("AIAKOS_AUTH_KEY_PASSWORD")
+	// Init Aiakos module
+	hsm, err := aiakos.NewAiakosPV(aiakosUrl, uint16(aiakosSigningKey), uint16(aiakosAuthKey), aiakosAuthPassword, ctx.Logger.With("module", "aiakos"))
+	if err != nil {
+		return nil, err
+	}
+	// Start Aiakos
+	err = hsm.Start()
+	if err != nil {
+		return nil, err
+	}
+	if os.Getenv("AIAKOS_IMPORT_KEY") == "TRUE" {
+		ctx.Logger.Info("importing private key to Aiakos because AIAKOS_IMPORT_KEY is set.")
+		// filepv := pvm.LoadOrGenFilePV
+		// key := pvm.FilePVKey{PrivKey: ed25519.PrivKeyEd25519{}}
+		x := []byte("A");
+		err = hsm.ImportKey(uint16(aiakosSigningKey), x)
+		if err != nil {
+			ctx.Logger.Error("Could not import key to HSM; skipping this step since it probably already exists", "error", err)
+		}
+	}
 	// create & start tendermint node
 	tmNode, err := node.NewNode(
 		cfg,
-		pvm.LoadOrGenFilePV(cfg.PrivValidatorKeyFile(), cfg.PrivValidatorStateFile()),
+		hsm,
 		nodeKey,
 		proxy.NewLocalClientCreator(app),
 		node.DefaultGenesisDocProviderFunc(cfg),
