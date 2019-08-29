@@ -3,19 +3,20 @@ package server
 import (
 	"errors"
 	"fmt"
+	"github.com/tendermint/tendermint/crypto/ed25519"
 	"os"
 	"strconv"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/tendermint/tendermint/abci/server"
 	"github.com/certusone/aiakos"
+	"github.com/tendermint/tendermint/abci/server"
 	tcmd "github.com/tendermint/tendermint/cmd/tendermint/commands"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	"github.com/tendermint/tendermint/node"
 	"github.com/tendermint/tendermint/p2p"
-	// pvm "github.com/tendermint/tendermint/privval"
+	pvm "github.com/tendermint/tendermint/privval"
 	"github.com/tendermint/tendermint/proxy"
 )
 
@@ -162,10 +163,9 @@ func startInProcess(ctx *Context, appCreator AppCreator) (*node.Node, error) {
 	}
 	if os.Getenv("AIAKOS_IMPORT_KEY") == "TRUE" {
 		ctx.Logger.Info("importing private key to Aiakos because AIAKOS_IMPORT_KEY is set.")
-		// filepv := pvm.LoadOrGenFilePV
-		// key := pvm.FilePVKey{PrivKey: ed25519.PrivKeyEd25519{}}
-		x := []byte("A");
-		err = hsm.ImportKey(uint16(aiakosSigningKey), x)
+		filepv := pvm.LoadOrGenFilePV(cfg.PrivValidatorKey, cfg.PrivValidatorState)
+		key := filepv.Key.PrivKey.(ed25519.PrivKeyEd25519)
+		err = hsm.ImportKey(uint16(aiakosSigningKey), key[:32])
 		if err != nil {
 			ctx.Logger.Error("Could not import key to HSM; skipping this step since it probably already exists", "error", err)
 		}
