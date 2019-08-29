@@ -3,7 +3,7 @@ package context
 import (
 	"fmt"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
 )
 
 // ErrInvalidAccount returns a standardized error reflecting that a given

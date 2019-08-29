@@ -8,9 +8,9 @@ import (
 	"github.com/tendermint/tendermint/libs/common"
 	tmtypes "github.com/tendermint/tendermint/types"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/staking/keeper"
-	"github.com/cosmos/cosmos-sdk/x/staking/types"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/staking/keeper"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/staking/types"
 )
 
 func NewHandler(k keeper.Keeper) sdk.Handler {

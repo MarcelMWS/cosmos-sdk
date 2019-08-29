@@ -4,11 +4,11 @@ import (
 	"crypto/rand"
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/store/dbadapter"
-	"github.com/cosmos/cosmos-sdk/store/gaskv"
-	"github.com/cosmos/cosmos-sdk/store/iavl"
-	"github.com/cosmos/cosmos-sdk/store/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/dbadapter"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/gaskv"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/iavl"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/types"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
 
 	"github.com/stretchr/testify/require"
 

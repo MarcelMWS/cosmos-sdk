@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	govtypes "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/gov/types"
 )
 
 const (

@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/cosmos/cosmos-sdk/store/prefix"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/prefix"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
 )
 
 func TestKeeper(t *testing.T) {

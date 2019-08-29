@@ -3,8 +3,8 @@ package slashing
 import (
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/slashing/types"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/slashing/types"
 )
 
 // MaxEvidenceAge - max age for evidence

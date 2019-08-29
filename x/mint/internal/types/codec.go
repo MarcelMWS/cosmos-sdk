@@ -1,7 +1,7 @@
 package types
 
 import (
-	"github.com/cosmos/cosmos-sdk/codec"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
 )
 
 // generic sealed codec to be used throughout this module

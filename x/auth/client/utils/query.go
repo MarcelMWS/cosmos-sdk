@@ -8,10 +8,10 @@ import (
 
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/types"
 )
 
 // QueryTxsByEvents performs a search for transactions for a given set of events

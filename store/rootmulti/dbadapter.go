@@ -1,8 +1,8 @@
 package rootmulti
 
 import (
-	"github.com/cosmos/cosmos-sdk/store/dbadapter"
-	"github.com/cosmos/cosmos-sdk/store/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/dbadapter"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/types"
 )
 
 var commithash = []byte("FAKE_HASH")

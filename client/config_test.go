@@ -10,10 +10,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/cosmos/cosmos-sdk/client/flags"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/flags"
 )
 
-// For https://github.com/cosmos/cosmos-sdk/issues/3899
+// For https://repo.mwaysolutions.com/blockscape/gaia-yubihsm/issues/3899
 func Test_runConfigCmdTwiceWithShorterNodeValue(t *testing.T) {
 	// Prepare environment
 	t.Parallel()

@@ -1,9 +1,9 @@
 package exported
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
 
-	"github.com/cosmos/cosmos-sdk/x/auth/exported"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/exported"
 )
 
 // ModuleAccountI defines an account interface for modules that hold tokens in an escrow

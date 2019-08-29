@@ -9,12 +9,12 @@ import (
 
 	dbm "github.com/tendermint/tm-db"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/cosmos/cosmos-sdk/x/params/subspace"
-	"github.com/cosmos/cosmos-sdk/x/params/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/params"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/params/subspace"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/params/types"
 )
 
 type testInput struct {

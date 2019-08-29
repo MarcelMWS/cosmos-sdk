@@ -3,9 +3,9 @@ package genutil
 import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/genutil/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/genutil/types"
 )
 
 // InitGenesis - initialize accounts and deliver genesis transactions

@@ -3,7 +3,7 @@ package baseapp
 import (
 	"fmt"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
 )
 
 type router struct {

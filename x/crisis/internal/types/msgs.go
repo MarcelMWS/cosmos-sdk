@@ -1,7 +1,7 @@
 package types
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
 )
 
 // MsgVerifyInvariant - message struct to verify a particular invariance

@@ -8,13 +8,13 @@ import (
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/cosmos/cosmos-sdk/x/crisis/client/cli"
-	"github.com/cosmos/cosmos-sdk/x/crisis/internal/keeper"
-	"github.com/cosmos/cosmos-sdk/x/crisis/internal/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/types/module"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/crisis/client/cli"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/crisis/internal/keeper"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/crisis/internal/types"
 )
 
 var (

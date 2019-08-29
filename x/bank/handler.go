@@ -3,9 +3,9 @@ package bank
 import (
 	"fmt"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/bank/internal/keeper"
-	"github.com/cosmos/cosmos-sdk/x/bank/internal/types"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/bank/internal/keeper"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/bank/internal/types"
 )
 
 // NewHandler returns a handler for "bank" type messages.

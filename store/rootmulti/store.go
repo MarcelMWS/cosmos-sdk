@@ -10,13 +10,13 @@ import (
 	"github.com/tendermint/tendermint/crypto/tmhash"
 	dbm "github.com/tendermint/tm-db"
 
-	"github.com/cosmos/cosmos-sdk/store/cachemulti"
-	"github.com/cosmos/cosmos-sdk/store/dbadapter"
-	"github.com/cosmos/cosmos-sdk/store/errors"
-	"github.com/cosmos/cosmos-sdk/store/iavl"
-	"github.com/cosmos/cosmos-sdk/store/tracekv"
-	"github.com/cosmos/cosmos-sdk/store/transient"
-	"github.com/cosmos/cosmos-sdk/store/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/cachemulti"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/dbadapter"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/errors"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/iavl"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/tracekv"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/transient"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/types"
 )
 
 const (

@@ -21,10 +21,10 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	pvm "github.com/tendermint/tendermint/privval"
 
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/server/config"
-	"github.com/cosmos/cosmos-sdk/version"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/flags"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/server/config"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/version"
 )
 
 // server context

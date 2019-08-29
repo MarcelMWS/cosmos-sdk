@@ -3,9 +3,9 @@ package crisis
 import (
 	"fmt"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/crisis/internal/keeper"
-	"github.com/cosmos/cosmos-sdk/x/crisis/internal/types"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/crisis/internal/keeper"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/crisis/internal/types"
 )
 
 // RouterKey

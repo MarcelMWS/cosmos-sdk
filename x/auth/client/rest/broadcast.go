@@ -4,9 +4,9 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/cosmos/cosmos-sdk/x/auth/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/types/rest"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/types"
 )
 
 // BroadcastReq defines a tx broadcasting request.

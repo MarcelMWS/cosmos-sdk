@@ -6,11 +6,11 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
-	"github.com/cosmos/cosmos-sdk/x/staking/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/types/rest"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/client/utils"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/staking/types"
 )
 
 // contains checks if the a given query contains one of the tx types

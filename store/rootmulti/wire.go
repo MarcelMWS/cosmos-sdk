@@ -1,7 +1,7 @@
 package rootmulti
 
 import (
-	"github.com/cosmos/cosmos-sdk/codec"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
 )
 
 var cdc = codec.New()

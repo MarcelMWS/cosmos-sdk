@@ -13,11 +13,11 @@ import (
 
 	tmtypes "github.com/tendermint/tendermint/types"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/rest"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/flags"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/types/rest"
 )
 
 // TODO these next two functions feel kinda hacky based on their placement

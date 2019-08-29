@@ -1,8 +1,8 @@
 package types
 
 import (
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/x/supply/exported"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/supply/exported"
 )
 
 // RegisterCodec registers the account types and interface

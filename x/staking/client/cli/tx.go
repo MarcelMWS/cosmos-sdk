@@ -12,14 +12,14 @@ import (
 	cfg "github.com/tendermint/tendermint/config"
 	"github.com/tendermint/tendermint/crypto"
 
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/version"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
-	"github.com/cosmos/cosmos-sdk/x/staking/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/version"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/client/utils"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/staking/types"
 )
 
 // GetTxCmd returns the transaction commands for this module

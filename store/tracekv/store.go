@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/cosmos/cosmos-sdk/store/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/types"
 )
 
 const (

@@ -3,7 +3,7 @@ package rest
 import (
 	"github.com/gorilla/mux"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
 )
 
 // RegisterRoutes registers the auth module REST routes.

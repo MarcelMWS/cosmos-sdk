@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/cosmos/cosmos-sdk/client"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client"
 )
 
 func TestPaginate(t *testing.T) {

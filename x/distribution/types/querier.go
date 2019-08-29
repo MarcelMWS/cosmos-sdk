@@ -1,6 +1,6 @@
 package types
 
-import sdk "github.com/cosmos/cosmos-sdk/types"
+import sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
 
 // querier keys
 const (

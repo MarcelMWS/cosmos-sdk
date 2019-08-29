@@ -6,11 +6,11 @@ import (
 	"math/big"
 	"math/rand"
 
-	"github.com/cosmos/cosmos-sdk/baseapp"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/cosmos/cosmos-sdk/x/simulation"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/baseapp"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/simulation"
 )
 
 // SimulateDeductFee

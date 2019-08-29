@@ -14,14 +14,14 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	rpcserver "github.com/tendermint/tendermint/rpc/lib/server"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/codec"
-	keybase "github.com/cosmos/cosmos-sdk/crypto/keys"
-	"github.com/cosmos/cosmos-sdk/server"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/flags"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
+	keybase "repo.mwaysolutions.com/blockscape/gaia-yubihsm/crypto/keys"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/server"
 
 	// unnamed import of statik for swagger UI support
-	_ "github.com/cosmos/cosmos-sdk/client/lcd/statik"
+	_ "repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/lcd/statik"
 )
 
 // RestServer represents the Light Client Rest server

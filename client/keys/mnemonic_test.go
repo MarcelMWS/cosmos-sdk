@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/tests"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/tests"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

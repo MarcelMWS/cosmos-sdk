@@ -6,13 +6,13 @@ import (
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/bank"
-	"github.com/cosmos/cosmos-sdk/x/bank/internal/keeper"
-	"github.com/cosmos/cosmos-sdk/x/bank/internal/types"
-	"github.com/cosmos/cosmos-sdk/x/mock"
-	"github.com/cosmos/cosmos-sdk/x/supply"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/bank"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/bank/internal/keeper"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/bank/internal/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/mock"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/supply"
 )
 
 var moduleAccAddr = sdk.AccAddress([]byte("moduleAcc"))

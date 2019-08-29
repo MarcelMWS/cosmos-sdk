@@ -12,7 +12,7 @@ import (
 	"github.com/tendermint/tendermint/privval"
 	tmtypes "github.com/tendermint/tendermint/types"
 
-	"github.com/cosmos/cosmos-sdk/server"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/server"
 )
 
 // ExportGenesisFile creates and writes the genesis configuration to disk. An

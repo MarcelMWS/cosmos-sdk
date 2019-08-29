@@ -3,7 +3,7 @@
 package v0_34
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
 )
 
 const (

@@ -6,11 +6,11 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/baseapp"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/gov"
-	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/cosmos/cosmos-sdk/x/simulation"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/baseapp"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/gov"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/params"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/simulation"
 )
 
 type simParamChange struct {

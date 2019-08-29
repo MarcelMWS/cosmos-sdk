@@ -1,7 +1,7 @@
 package keys
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
 )
 
 // KeyOutput defines a structure wrapping around an Info object used for output

@@ -7,8 +7,8 @@ import (
 
 	"github.com/tendermint/tendermint/crypto"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	v034staking "github.com/cosmos/cosmos-sdk/x/staking/legacy/v0_34"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	v034staking "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/staking/legacy/v0_34"
 )
 
 const (

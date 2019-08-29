@@ -3,8 +3,8 @@ package keys
 import (
 	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/hd"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/crypto/keys/hd"
 )
 
 var cdc *codec.Codec

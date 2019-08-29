@@ -5,12 +5,12 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/types/rest"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/client/utils"
 
-	"github.com/cosmos/cosmos-sdk/x/bank/internal/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/bank/internal/types"
 )
 
 // RegisterRoutes - Central function to define routes that get registered by the main application

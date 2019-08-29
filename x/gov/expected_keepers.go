@@ -1,9 +1,9 @@
 package gov
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	stakingexported "github.com/cosmos/cosmos-sdk/x/staking/exported"
-	supplyexported "github.com/cosmos/cosmos-sdk/x/supply/exported"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	stakingexported "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/staking/exported"
+	supplyexported "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/supply/exported"
 )
 
 // SupplyKeeper defines the supply Keeper for module accounts
@@ -11,7 +11,7 @@ type SupplyKeeper interface {
 	GetModuleAddress(name string) sdk.AccAddress
 	GetModuleAccount(ctx sdk.Context, name string) supplyexported.ModuleAccountI
 
-	// TODO remove with genesis 2-phases refactor https://github.com/cosmos/cosmos-sdk/issues/2862
+	// TODO remove with genesis 2-phases refactor https://repo.mwaysolutions.com/blockscape/gaia-yubihsm/issues/2862
 	SetModuleAccount(sdk.Context, supplyexported.ModuleAccountI)
 
 	SendCoinsFromModuleToAccount(ctx sdk.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins) sdk.Error

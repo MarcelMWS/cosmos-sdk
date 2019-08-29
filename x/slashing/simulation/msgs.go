@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/cosmos/cosmos-sdk/baseapp"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/simulation"
-	"github.com/cosmos/cosmos-sdk/x/slashing"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/baseapp"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/simulation"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/slashing"
 )
 
 // SimulateMsgUnjail generates a MsgUnjail with random values

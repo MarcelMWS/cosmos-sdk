@@ -6,8 +6,8 @@ import (
 
 	"github.com/spf13/viper"
 
-	"github.com/cosmos/cosmos-sdk/client/input"
-	"github.com/cosmos/cosmos-sdk/crypto/keys"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/input"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/crypto/keys"
 
 	"github.com/spf13/cobra"
 )

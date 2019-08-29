@@ -3,10 +3,10 @@ package keeper
 import (
 	"fmt"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
 
-	"github.com/cosmos/cosmos-sdk/x/distribution/types"
-	"github.com/cosmos/cosmos-sdk/x/staking/exported"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/distribution/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/staking/exported"
 )
 
 // initialize starting info for a new delegation

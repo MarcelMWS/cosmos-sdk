@@ -3,7 +3,7 @@ package client
 import (
 	"github.com/gorilla/mux"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
 )
 
 // Register routes

@@ -1,10 +1,10 @@
 package types
 
 import (
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	authtypes "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/types"
+	stakingtypes "repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/staking/types"
 )
 
 // ModuleCdc defines a generic sealed codec to be used throughout this module

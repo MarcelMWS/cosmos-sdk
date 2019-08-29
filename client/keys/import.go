@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"io/ioutil"
 
-	"github.com/cosmos/cosmos-sdk/client/input"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/input"
 	"github.com/spf13/cobra"
 )
 

@@ -11,16 +11,16 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/bank"
-	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/cosmos/cosmos-sdk/x/staking"
-	"github.com/cosmos/cosmos-sdk/x/supply"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/bank"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/params"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/staking"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/supply"
 
-	"github.com/cosmos/cosmos-sdk/x/distribution/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/distribution/types"
 )
 
 //nolint: deadcode unused

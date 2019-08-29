@@ -3,7 +3,7 @@ package cli
 import (
 	flag "github.com/spf13/pflag"
 
-	"github.com/cosmos/cosmos-sdk/x/staking/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/staking/types"
 )
 
 // nolint

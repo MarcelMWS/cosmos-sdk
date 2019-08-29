@@ -6,12 +6,12 @@ import (
 
 	"github.com/tendermint/tendermint/crypto"
 
-	"github.com/cosmos/cosmos-sdk/baseapp"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/bank/internal/keeper"
-	"github.com/cosmos/cosmos-sdk/x/bank/internal/types"
-	"github.com/cosmos/cosmos-sdk/x/mock"
-	"github.com/cosmos/cosmos-sdk/x/simulation"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/baseapp"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/bank/internal/keeper"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/bank/internal/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/mock"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/simulation"
 )
 
 // SendTx tests and runs a single msg send where both

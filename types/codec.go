@@ -1,6 +1,6 @@
 package types
 
-import "github.com/cosmos/cosmos-sdk/codec"
+import "repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
 
 // Register the sdk message type
 func RegisterCodec(cdc *codec.Codec) {

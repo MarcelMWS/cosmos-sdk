@@ -7,10 +7,10 @@ import (
 
 	"github.com/spf13/viper"
 
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/client/keys"
-	crkeys "github.com/cosmos/cosmos-sdk/crypto/keys"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/flags"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/keys"
+	crkeys "repo.mwaysolutions.com/blockscape/gaia-yubihsm/crypto/keys"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
 )
 
 // TxBuilder implements a transaction context created in SDK modules.

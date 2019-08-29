@@ -1,3 +1,3 @@
 package statik
 
-//This just for fixing the error in importing empty github.com/cosmos/cosmos-sdk/client/lcd/statik
+//This just for fixing the error in importing empty repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/lcd/statik

@@ -8,7 +8,7 @@ import (
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/cosmos/cosmos-sdk/x/auth/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/auth/types"
 )
 
 func Test_queryAccount(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/stretchr/testify/require"

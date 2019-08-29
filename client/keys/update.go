@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/cosmos/cosmos-sdk/client/input"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/input"
 )
 
 func updateKeyCommand() *cobra.Command {

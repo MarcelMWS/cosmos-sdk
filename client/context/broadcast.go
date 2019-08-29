@@ -3,8 +3,8 @@ package context
 import (
 	"fmt"
 
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/flags"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
 )
 
 // BroadcastTx broadcasts a transactions either synchronously or asynchronously

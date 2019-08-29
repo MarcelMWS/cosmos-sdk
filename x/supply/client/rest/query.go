@@ -6,9 +6,9 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/cosmos/cosmos-sdk/x/supply/internal/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/types/rest"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/supply/internal/types"
 )
 
 // RegisterRoutes registers staking-related REST handlers to a router

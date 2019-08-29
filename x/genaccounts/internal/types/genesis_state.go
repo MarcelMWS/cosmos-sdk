@@ -6,7 +6,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/codec"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/codec"
 )
 
 // State to Unmarshal

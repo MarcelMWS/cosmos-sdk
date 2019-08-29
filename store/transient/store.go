@@ -3,9 +3,9 @@ package transient
 import (
 	dbm "github.com/tendermint/tm-db"
 
-	"github.com/cosmos/cosmos-sdk/store/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/types"
 
-	"github.com/cosmos/cosmos-sdk/store/dbadapter"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/store/dbadapter"
 )
 
 var _ types.Committer = (*Store)(nil)

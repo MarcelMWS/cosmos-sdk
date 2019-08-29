@@ -3,10 +3,10 @@ package rest
 import (
 	"net/http"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/cosmos/cosmos-sdk/x/genutil/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/client/context"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/types/rest"
+	"repo.mwaysolutions.com/blockscape/gaia-yubihsm/x/genutil/types"
 )
 
 // QueryGenesisTxs writes the genesis transactions to the response if no error

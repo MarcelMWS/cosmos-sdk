@@ -3,7 +3,7 @@ package auth
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdk "repo.mwaysolutions.com/blockscape/gaia-yubihsm/types"
 )
 
 func BenchmarkAccountMapperGetAccountFound(b *testing.B) {
