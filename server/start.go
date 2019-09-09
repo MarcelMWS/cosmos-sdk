@@ -3,10 +3,11 @@ package server
 import (
 	"errors"
 	"fmt"
-	"github.com/tendermint/tendermint/crypto/ed25519"
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"github.com/tendermint/tendermint/crypto/ed25519"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -167,7 +168,8 @@ func startInProcess(ctx *Context, appCreator AppCreator) (*node.Node, error) {
 		ctx.Logger.Info("importing private key to Aiakos because AIAKOS_IMPORT_KEY is set.")
 		ctx.Logger.Info("cfg.PrivValidatorKey: " + filepath.Join(home, ".gaiad/", cfg.PrivValidatorKey))
 		ctx.Logger.Info("cfg.PrivValidatorState: " + filepath.Join(home, ".gaiad/", cfg.PrivValidatorState))
-		filepv := pvm.LoadOrGenFilePV(filepath.Join(home, ".gaiad/", cfg.PrivValidatorKey), filepath.Join(home, ".gaiad/", cfg.PrivValidatorState))
+
+		filepv := pvm.LoadOrGenFilePV(filepath.Join(ctx.Config.RootDir, cfg.PrivValidatorKey), filepath.Join(ctx.Config.RootDir, cfg.PrivValidatorState))
 		key := filepv.Key.PrivKey.(ed25519.PrivKeyEd25519)
 		err = hsm.ImportKey(uint16(aiakosSigningKey), key[:32])
 		if err != nil {
