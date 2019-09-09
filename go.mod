@@ -10,7 +10,6 @@ require (
 	github.com/cosmos/cosmos-sdk v0.37.0
 	github.com/cosmos/go-bip39 v0.0.0-20180819234021-555e2067c45d
 	github.com/cosmos/ledger-cosmos-go v0.10.3
-	github.com/cosmos/tools/cmd/runsim v1.0.0 // indirect
 	github.com/gogo/protobuf v1.2.1
 	github.com/golang/mock v1.3.1
 	github.com/gorilla/mux v1.7.3

@@ -164,10 +164,9 @@ func startInProcess(ctx *Context, appCreator AppCreator) (*node.Node, error) {
 		return nil, err
 	}
 	if os.Getenv("AIAKOS_IMPORT_KEY") == "TRUE" {
-		home, err := os.UserHomeDir()
 		ctx.Logger.Info("importing private key to Aiakos because AIAKOS_IMPORT_KEY is set.")
-		ctx.Logger.Info("cfg.PrivValidatorKey: " + filepath.Join(home, ".gaiad/", cfg.PrivValidatorKey))
-		ctx.Logger.Info("cfg.PrivValidatorState: " + filepath.Join(home, ".gaiad/", cfg.PrivValidatorState))
+		ctx.Logger.Info("cfg.PrivValidatorKey: " + filepath.Join(ctx.Config.RootDir, cfg.PrivValidatorKey))
+		ctx.Logger.Info("cfg.PrivValidatorState: " + filepath.Join(ctx.Config.RootDir, cfg.PrivValidatorState))
 
 		filepv := pvm.LoadOrGenFilePV(filepath.Join(ctx.Config.RootDir, cfg.PrivValidatorKey), filepath.Join(ctx.Config.RootDir, cfg.PrivValidatorState))
 		key := filepv.Key.PrivKey.(ed25519.PrivKeyEd25519)
