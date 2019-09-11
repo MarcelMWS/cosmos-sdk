@@ -30,6 +30,6 @@ require (
 	gopkg.in/yaml.v2 v2.2.2
 )
 
-replace github.com/certusone/aiakos => repo.mwaysolutions.com/blockscape/aiakos-raft v0.1.0-raft-test-1
+replace github.com/certusone/aiakos => repo.mwaysolutions.com/blockscape/aiakos-raft v0.1.0
 
 replace github.com/cosmos/cosmos-sdk => repo.mwaysolutions.com/blockscape/cosmos-sdk-yubihsm v0.37.0-raft-test-5
