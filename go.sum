@@ -318,3 +318,5 @@ repo.mwaysolutions.com/blockscape/aiakos-raft v0.1.0 h1:tOQeI0KybnovrALLJXZz70oi
 repo.mwaysolutions.com/blockscape/aiakos-raft v0.1.0/go.mod h1:GTqvMD2WfaDS8UdOHiHGRKb7oK48+aLibOq5dgNh+iw=
 repo.mwaysolutions.com/blockscape/cosmos-sdk-yubihsm v0.37.0-raft-test-2 h1:6LagWTZJzD8wmf/7DsNyKtSATPrn5nMVt2QPnCcs/AA=
 repo.mwaysolutions.com/blockscape/cosmos-sdk-yubihsm v0.37.0-raft-test-2/go.mod h1:BS/ggMfA/x1PvkEsD5TQQPGoxheA2yBS+j4ixwNpNlw=
+repo.mwaysolutions.com/blockscape/cosmos-sdk-yubihsm v0.37.0-raft-test-3 h1:aHqYeUiR+9Pt2MUSvXzepT7DtiSwvQQGvj+EjA71qXE=
+repo.mwaysolutions.com/blockscape/cosmos-sdk-yubihsm v0.37.0-raft-test-3/go.mod h1:cvt0VJNtYAPrf9j15sQ65F/ifFCLTd4V9jbz/oF+nYk=

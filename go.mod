@@ -32,4 +32,4 @@ require (
 
 replace github.com/certusone/aiakos => repo.mwaysolutions.com/blockscape/aiakos-raft v0.1.0
 
-replace github.com/cosmos/cosmos-sdk => repo.mwaysolutions.com/blockscape/cosmos-sdk-yubihsm v0.37.0-raft-test-3
+replace github.com/cosmos/cosmos-sdk => repo.mwaysolutions.com/blockscape/cosmos-sdk-yubihsm v0.37.0-raft-test-4

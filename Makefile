@@ -20,7 +20,7 @@ include contrib/devtools/Makefile
 ### Build
 
 build: go.sum
-	@go build -mod=readonly ./...
+	@go build ./...
 .PHONY: build
 
 update-swagger-docs: statik
