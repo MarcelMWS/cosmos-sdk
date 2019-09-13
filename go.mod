@@ -7,6 +7,7 @@ require (
 	github.com/bgentry/speakeasy v0.1.0
 	github.com/btcsuite/btcd v0.0.0-20190824003749-130ea5bddde3
 	github.com/certusone/aiakos v0.3.0
+	github.com/certusone/yubihsm-go v0.1.0 // indirect
 	github.com/cosmos/cosmos-sdk v0.37.0
 	github.com/cosmos/go-bip39 v0.0.0-20180819234021-555e2067c45d
 	github.com/cosmos/ledger-cosmos-go v0.10.3
@@ -29,7 +30,3 @@ require (
 	github.com/tendermint/tm-db v0.1.1
 	gopkg.in/yaml.v2 v2.2.2
 )
-
-replace github.com/certusone/aiakos => repo.mwaysolutions.com/blockscape/aiakos-raft v0.1.1
-
-replace github.com/cosmos/cosmos-sdk => repo.mwaysolutions.com/blockscape/cosmos-sdk-yubihsm v0.37.0-raft-test-6
