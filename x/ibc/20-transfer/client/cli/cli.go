@@ -30,6 +30,7 @@ func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 
 	ics20TransferTxCmd.AddCommand(flags.PostCommands(
 		GetTransferTxCmd(cdc),
+		GetTroughputTxCmd(cdc),
 	)...)
 
 	return ics20TransferTxCmd
