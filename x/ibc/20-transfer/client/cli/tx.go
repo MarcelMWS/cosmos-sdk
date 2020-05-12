@@ -95,7 +95,7 @@ func GetTroughputTxCmd(cdc *codec.Codec) *cobra.Command {
 
 			inBuf := bufio.NewReader(cmd.InOrStdin())
 			txBldr := authtypes.NewTxBuilderFromCLI(inBuf).WithTxEncoder(authclient.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContextWithInput(inBuf).WithCodec(cdc).WithBroadcastMode(flags.BroadcastBlock).WithGenerateOnly(false).WithChainID(viper.GetString("chain-id")).WithFromName("key")
+			cliCtx := context.NewCLIContextWithInput(inBuf).WithCodec(cdc).WithBroadcastMode(flags.BroadcastBlock).WithGenerateOnly(false).WithChainID(viper.GetString("chain-id"))
 
 			// get values
 			// log.Println(viper.Get("pathd.client-id"))
