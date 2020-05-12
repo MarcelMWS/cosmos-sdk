@@ -96,7 +96,7 @@ func NewCLIContextWithInputAndFrom(input io.Reader, from string) CLIContext {
 		Input:         input,
 		Output:        os.Stdout,
 		NodeURI:       nodeURI,
-		From:          viper.GetString(flags.FlagFrom),
+		From:          from,
 		Keyring:       keyring,
 		OutputFormat:  viper.GetString(cli.OutputFlag),
 		Height:        viper.GetInt64(flags.FlagHeight),

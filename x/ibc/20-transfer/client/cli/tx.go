@@ -3,7 +3,6 @@ package cli
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/spf13/cobra"
@@ -81,7 +80,7 @@ func GetTroughputTxCmd(cdc *codec.Codec) *cobra.Command {
 			viper.SetDefault("dest-height", "0")
 			viper.SetDefault("amount", "1")
 			viper.SetDefault("node", "tcp://ibc.blockscape.:26657")
-			viper.SetDefault("chain-id", "abchain")
+			viper.SetDefault("chain-id", "mwchain")
 			viper.SetDefault("send_accounts", map[int]string{0: "cosmos12f3pu4cn9frg5t3pn2acwywn8z8ds9uqfhxeml", 1: "", 2: "", 3: "", 4: "", 5: "", 6: ""})
 
 			//safe config
@@ -94,35 +93,37 @@ func GetTroughputTxCmd(cdc *codec.Codec) *cobra.Command {
 			}
 
 			inBuf := bufio.NewReader(cmd.InOrStdin())
-			txBldr := authtypes.NewTxBuilderFromCLI(inBuf).WithTxEncoder(authclient.GetTxEncoder(cdc))
-			cliCtx := context.NewCLIContextWithInput(inBuf).WithCodec(cdc).WithBroadcastMode(flags.BroadcastBlock).WithGenerateOnly(false).WithChainID(viper.GetString("chain-id"))
+			for i := 0; i < 7; i++ {
+				fromName := strconv.Itoa(i)
+				txBldr := authtypes.NewTxBuilderFromCLI(inBuf).WithTxEncoder(authclient.GetTxEncoder(cdc))
+				cliCtx := context.NewCLIContextWithFrom(fromName).WithCodec(cdc).WithBroadcastMode(flags.BroadcastBlock).WithGenerateOnly(false).WithChainID(viper.GetString("chain-id"))
 
-			// get values
-			// log.Println(viper.Get("pathd.client-id"))
+				sender, err := sdk.AccAddressFromBech32(viper.GetString("send_accounts." + fromName))
+				srcPort := viper.GetString("paths.port-id")
+				srcChannel := viper.GetString("paths.channel-id")
+				destHeight, err := strconv.Atoi(viper.GetString("dest-height"))
+				if err != nil {
+					return err
+				}
 
-			sender, err := sdk.AccAddressFromBech32(viper.GetString("send_accounts.0"))
-			srcPort := viper.GetString("paths.port-id")
-			srcChannel := viper.GetString("paths.channel-id")
-			destHeight, err := strconv.Atoi(viper.GetString("dest-height"))
-			if err != nil {
-				return err
+				// parse coin trying to be sent
+				coins, err := sdk.ParseCoins(viper.GetString("amount") + viper.GetString("paths.port-id") + "/" + viper.GetString("pathd.channel-id") + "/" + viper.GetString("paths.coin"))
+				if err != nil {
+					return err
+				}
+
+				//edit sender
+				msg := types.NewMsgTransfer(srcPort, srcChannel, uint64(destHeight), coins, sender, viper.GetString("rec_address"))
+				if err := msg.ValidateBasic(); err != nil {
+					return err
+				}
+
+				err = authclient.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+				if err != nil {
+					fmt.Printf("%v", err)
+				}
 			}
-
-			// parse coin trying to be sent
-			coins, err := sdk.ParseCoins(viper.GetString("amount") + viper.GetString("paths.port-id") + "/" + viper.GetString("pathd.channel-id") + "/" + viper.GetString("paths.coin"))
-			if err != nil {
-				return err
-			}
-			log.Println("Coins: ", coins)
-
-			//edit sender
-			msg := types.NewMsgTransfer(srcPort, srcChannel, uint64(destHeight), coins, sender, viper.GetString("rec_address"))
-			if err := msg.ValidateBasic(); err != nil {
-				return err
-			}
-
-			log.Println(msg)
-			return authclient.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+			return nil
 		},
 	}
 	return cmd
