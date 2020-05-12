@@ -1,7 +1,6 @@
 package client
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
 	"io/ioutil"
@@ -14,7 +13,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/client/input"
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -97,16 +95,16 @@ func CompleteAndBroadcastTxCLI(txBldr authtypes.TxBuilder, cliCtx context.CLICon
 
 		_, _ = fmt.Fprintf(os.Stderr, "%s\n\n", json)
 
-		buf := bufio.NewReader(os.Stdin)
-		ok, err := input.GetConfirmation("confirm transaction before signing and broadcasting", buf, os.Stderr)
-		if err != nil || !ok {
-			_, _ = fmt.Fprintf(os.Stderr, "%s\n", "cancelled transaction")
-			return err
-		}
+		/* 		buf := bufio.NewReader(os.Stdin)
+		   		ok, err := input.GetConfirmation("confirm transaction before signing and broadcasting", buf, os.Stderr)
+		   		if err != nil || !ok {
+		   			_, _ = fmt.Fprintf(os.Stderr, "%s\n", "cancelled transaction")
+		   			return err
+		   		} */
 	}
 
 	// build and sign the transaction
-	txBytes, err := txBldr.BuildAndSign(fromName, keys.DefaultKeyPass, msgs)
+	txBytes, err := txBldr.BuildAndSign(fromName, "qaywsxedc", msgs)
 	if err != nil {
 		return err
 	}
