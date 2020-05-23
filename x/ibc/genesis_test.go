@@ -82,7 +82,7 @@ func (suite *IBCTestSuite) TestValidateGenesis() {
 				ClientGenesis: client.NewGenesisState(
 					[]exported.ClientState{
 						ibctmtypes.NewClientState(clientID, trustingPeriod, ubdPeriod, maxClockDrift, suite.header),
-						localhosttypes.NewClientState(suite.store, "chaindID", 0),
+						localhosttypes.NewClientState(suite.store, "(chaindID)", 0),
 					},
 					nil,
 					false,
@@ -97,7 +97,7 @@ func (suite *IBCTestSuite) TestValidateGenesis() {
 				ClientGenesis: client.DefaultGenesisState(),
 				ConnectionGenesis: connection.NewGenesisState(
 					[]connection.End{
-						connection.NewConnectionEnd(ibctypes.INIT, connectionID, "CLIENTIDONE", connection.NewCounterparty(clientID, connectionID2, commitmenttypes.NewMerklePrefix([]byte("prefix"))), []string{"1.0.0"}),
+						connection.NewConnectionEnd(ibctypes.INIT, connectionID, "(CLIENTIDONE)", connection.NewCounterparty(clientID, connectionID2, commitmenttypes.NewMerklePrefix([]byte("prefix"))), []string{"1.0.0"}),
 					},
 					[]connection.Paths{
 						connection.NewConnectionPaths(clientID, []string{ibctypes.ConnectionPath(connectionID)}),
@@ -113,7 +113,7 @@ func (suite *IBCTestSuite) TestValidateGenesis() {
 				ConnectionGenesis: connection.DefaultGenesisState(),
 				ChannelGenesis: channel.GenesisState{
 					Acknowledgements: []channel.PacketAckCommitment{
-						channel.NewPacketAckCommitment("portID", channel1, 1, []byte("ack")),
+						channel.NewPacketAckCommitment("(portID)", channel1, 1, []byte("ack")),
 					},
 				},
 			},

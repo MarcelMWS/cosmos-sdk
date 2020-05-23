@@ -18,11 +18,12 @@ func (suite *TendermintTestSuite) TestMsgCreateClientValidateBasic() {
 		errMsg  string
 	}{
 		{ibctmtypes.NewMsgCreateClient(exported.ClientTypeTendermint, suite.header, trustingPeriod, ubdPeriod, maxClockDrift, signer), true, "success msg should pass"},
-		{ibctmtypes.NewMsgCreateClient("BADCHAIN", suite.header, trustingPeriod, ubdPeriod, maxClockDrift, signer), false, "invalid client id passed"},
+		{ibctmtypes.NewMsgCreateClient("(BADCHAIN)", suite.header, trustingPeriod, ubdPeriod, maxClockDrift, signer), false, "invalid client id passed"},
 		{ibctmtypes.NewMsgCreateClient(exported.ClientTypeTendermint, suite.header, 0, ubdPeriod, maxClockDrift, signer), false, "zero trusting period passed"},
 		{ibctmtypes.NewMsgCreateClient(exported.ClientTypeTendermint, suite.header, trustingPeriod, 0, maxClockDrift, signer), false, "zero unbonding period passed"},
 		{ibctmtypes.NewMsgCreateClient(exported.ClientTypeTendermint, suite.header, trustingPeriod, ubdPeriod, maxClockDrift, nil), false, "Empty address passed"},
 		{ibctmtypes.NewMsgCreateClient(exported.ClientTypeTendermint, ibctmtypes.Header{}, trustingPeriod, ubdPeriod, maxClockDrift, signer), false, "nil header"},
+		{ibctmtypes.NewMsgCreateClient(exported.ClientTypeTendermint, ibctmtypes.Header{}, trustingPeriod, ubdPeriod, maxClockDrift, signer), false, "invalid header"},
 	}
 
 	for i, tc := range cases {
@@ -45,7 +46,7 @@ func (suite *TendermintTestSuite) TestMsgUpdateClient() {
 		errMsg  string
 	}{
 		{ibctmtypes.NewMsgUpdateClient(exported.ClientTypeTendermint, ibctmtypes.Header{}, signer), true, "success msg should pass"},
-		{ibctmtypes.NewMsgUpdateClient("badClient", ibctmtypes.Header{}, signer), false, "invalid client id passed"},
+		{ibctmtypes.NewMsgUpdateClient("(badClient)", ibctmtypes.Header{}, signer), false, "invalid client id passed"},
 		{ibctmtypes.NewMsgUpdateClient(exported.ClientTypeTendermint, ibctmtypes.Header{}, nil), false, "Empty address passed"},
 	}
 
