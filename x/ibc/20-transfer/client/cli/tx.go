@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -93,8 +94,10 @@ func GetTroughputTxCmd(cdc *codec.Codec) *cobra.Command {
 			}
 
 			inBuf := bufio.NewReader(cmd.InOrStdin())
-			for i := 0; i < 7; i++ {
-				fromName := strconv.Itoa(i)
+			timeout, err := strconv.Atoi(viper.GetString("txtimeout"))
+
+			for 1 == 1 {
+				fromName := strconv.Itoa(2)
 				txBldr := authtypes.NewTxBuilderFromCLI(inBuf).WithTxEncoder(authclient.GetTxEncoder(cdc)).WithGas(viper.GetUint64("gas"))
 				cliCtx := context.NewCLIContextWithFrom(fromName).WithCodec(cdc).WithBroadcastMode(flags.BroadcastAsync).WithGenerateOnly(false).WithChainID(viper.GetString("chain-id"))
 
@@ -118,13 +121,26 @@ func GetTroughputTxCmd(cdc *codec.Codec) *cobra.Command {
 					return err
 				}
 
-				err = authclient.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+				err = authclient.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg, msg})
 				if err != nil {
 					fmt.Printf("%v", err)
 				}
+				time.Sleep((time.Duration(timeout) * time.Second))
 			}
 			return nil
 		},
 	}
 	return cmd
 }
+
+/* func genMsg(arr []sdk.Msg, multipler int, msg types.MsgTransfer) []sdk.Msg {
+	m := len(arr)
+	for i := 0; i <= multipler; i++ {
+		newSlice := make([]byte, i)
+		copy(newSlice, arr)
+		arr = newSlice
+		arr = arr[0:i]
+		copy(arr[m:i], msg)
+	}
+	return arr
+} */
