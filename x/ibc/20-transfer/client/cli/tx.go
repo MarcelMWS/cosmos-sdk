@@ -80,7 +80,7 @@ func GetTroughputTxCmd(cdc *codec.Codec) *cobra.Command {
 			viper.SetDefault("rec_address", "cosmos1kq7yuwmanzj60p6ng0p9aj0ttsyd4ynaqvj36n")
 			viper.SetDefault("dest-height", "0")
 			viper.SetDefault("amount", "1")
-			viper.SetDefault("node", "tcp://ibc.blockscape.:26657")
+			viper.SetDefault("node", "tcp://ibc.blockscape.network:26657")
 			viper.SetDefault("chain-id", "mwchain")
 			viper.SetDefault("send_accounts", map[int]string{0: "cosmos12f3pu4cn9frg5t3pn2acwywn8z8ds9uqfhxeml", 1: "", 2: "", 3: "", 4: "", 5: "", 6: ""})
 
@@ -97,7 +97,7 @@ func GetTroughputTxCmd(cdc *codec.Codec) *cobra.Command {
 			timeout, err := strconv.Atoi(viper.GetString("txtimeout"))
 
 			for 1 == 1 {
-				fromName := strconv.Itoa(2)
+				fromName := "main"
 				txBldr := authtypes.NewTxBuilderFromCLI(inBuf).WithTxEncoder(authclient.GetTxEncoder(cdc)).WithGas(viper.GetUint64("gas"))
 				cliCtx := context.NewCLIContextWithFrom(fromName).WithCodec(cdc).WithBroadcastMode(flags.BroadcastAsync).WithGenerateOnly(false).WithChainID(viper.GetString("chain-id"))
 
