@@ -114,7 +114,7 @@ func (k Keeper) createOutgoingPacket(
 
 		// burn vouchers from the sender's balance if the source is from another chain
 		if err := k.bankKeeper.BurnCoins(
-			ctx, types.GetModuleAccountName(), amount,
+			ctx, types.GetModuleAccountName(), nil,
 		); err != nil {
 			// NOTE: should not happen as the module account was
 			// retrieved on the step above and it has enough balace
