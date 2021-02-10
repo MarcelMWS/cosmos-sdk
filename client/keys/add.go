@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strconv"
 
 	bip39 "github.com/cosmos/go-bip39"
 	"github.com/spf13/cobra"
@@ -22,15 +23,16 @@ import (
 )
 
 const (
-	flagInteractive = "interactive"
-	flagRecover     = "recover"
-	flagNoBackup    = "no-backup"
-	flagCoinType    = "coin-type"
-	flagAccount     = "account"
-	flagIndex       = "index"
-	flagMultisig    = "multisig"
-	flagNoSort      = "nosort"
-	flagHDPath      = "hd-path"
+	flagInteractive  = "interactive"
+	flagRecover      = "recover"
+	flagNoBackup     = "no-backup"
+	flagCoinType     = "coin-type"
+	flagAccount      = "account"
+	flagIndex        = "index"
+	flagMultisig     = "multisig"
+	flagNoSort       = "nosort"
+	flagHDPath       = "hd-path"
+	flagCreateNumber = "create-number"
 
 	// DefaultKeyPass contains the default key password for genesis transactions
 	DefaultKeyPass = "12345678"
@@ -75,6 +77,7 @@ the flag --nosort is set.
 	cmd.Flags().Uint32(flagCoinType, sdk.GetConfig().GetCoinType(), "coin type number for HD derivation")
 	cmd.Flags().Uint32(flagAccount, 0, "Account number for HD derivation")
 	cmd.Flags().Uint32(flagIndex, 0, "Address index number for HD derivation")
+	cmd.Flags().Uint32(flagCreateNumber, 1, "How many accounts to generate")
 	cmd.Flags().String(flags.FlagKeyAlgorithm, string(hd.Secp256k1Type), "Key signing algorithm to generate keys for")
 
 	cmd.SetOut(cmd.OutOrStdout())
@@ -84,6 +87,40 @@ the flag --nosort is set.
 }
 
 func runAddCmd(cmd *cobra.Command, args []string) error {
+	createNumber, _ := cmd.Flags().GetUint32(flagCreateNumber)
+
+	if createNumber > 1 {
+
+		//nameMod := make([]string, createNumber)
+		for i := 0; i < int(createNumber); i++ {
+			//nameMod = append(nameMod, strconv.Itoa(i))
+
+			buf := bufio.NewReader(cmd.InOrStdin())
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			var kr keyring.Keyring
+
+			dryRun, _ := cmd.Flags().GetBool(flags.FlagDryRun)
+			if dryRun {
+				kr, err = keyring.New(sdk.KeyringServiceName(), keyring.BackendMemory, clientCtx.KeyringDir, buf)
+			} else {
+				backend, _ := cmd.Flags().GetString(flags.FlagKeyringBackend)
+				kr, err = keyring.New(sdk.KeyringServiceName(), backend, clientCtx.KeyringDir, buf)
+			}
+
+			if err != nil {
+				return err
+			}
+			var argss [100000]string
+			argss[0] = strconv.Itoa(i)
+			RunAddCmd(cmd, argss, kr, buf)
+		}
+
+	}
+
 	buf := bufio.NewReader(cmd.InOrStdin())
 	clientCtx, err := client.GetClientQueryContext(cmd)
 	if err != nil {
@@ -104,7 +141,10 @@ func runAddCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	return RunAddCmd(cmd, args, kr, buf)
+	var argss [100000]string
+	argss[0] = "x"
+	return RunAddCmd(cmd, argss, kr, buf)
+
 }
 
 /*
@@ -116,7 +156,7 @@ input
 output
 	- armor encrypted private key (saved to file)
 */
-func RunAddCmd(cmd *cobra.Command, args []string, kb keyring.Keyring, inBuf *bufio.Reader) error {
+func RunAddCmd(cmd *cobra.Command, args [100000]string, kb keyring.Keyring, inBuf *bufio.Reader) error {
 	var err error
 
 	name := args[0]
@@ -281,8 +321,14 @@ func RunAddCmd(cmd *cobra.Command, args []string, kb keyring.Keyring, inBuf *buf
 		}
 	}
 
+	/* 	createNumber, _ := cmd.Flags().GetUint32(flagAccount)
+	   	for 0 < createNumber { */
 	info, err := kb.NewAccount(name, mnemonic, bip39Passphrase, hdPath, algo)
 	if err != nil {
+		return err
+	}
+	info2, err2 := kb.NewAccount("2", mnemonic, bip39Passphrase, hdPath, algo)
+	if err2 != nil {
 		return err
 	}
 
@@ -292,6 +338,8 @@ func RunAddCmd(cmd *cobra.Command, args []string, kb keyring.Keyring, inBuf *buf
 		showMnemonic = false
 		mnemonic = ""
 	}
+
+	printCreate(cmd, info2, showMnemonic, mnemonic)
 
 	return printCreate(cmd, info, showMnemonic, mnemonic)
 }
