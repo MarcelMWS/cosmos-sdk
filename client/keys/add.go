@@ -321,14 +321,8 @@ func RunAddCmd(cmd *cobra.Command, args [100000]string, kb keyring.Keyring, inBu
 		}
 	}
 
-	/* 	createNumber, _ := cmd.Flags().GetUint32(flagAccount)
-	   	for 0 < createNumber { */
 	info, err := kb.NewAccount(name, mnemonic, bip39Passphrase, hdPath, algo)
 	if err != nil {
-		return err
-	}
-	info2, err2 := kb.NewAccount("2", mnemonic, bip39Passphrase, hdPath, algo)
-	if err2 != nil {
 		return err
 	}
 
@@ -338,8 +332,6 @@ func RunAddCmd(cmd *cobra.Command, args [100000]string, kb keyring.Keyring, inBu
 		showMnemonic = false
 		mnemonic = ""
 	}
-
-	printCreate(cmd, info2, showMnemonic, mnemonic)
 
 	return printCreate(cmd, info, showMnemonic, mnemonic)
 }
