@@ -27,11 +27,20 @@ type Info interface {
 	GetAlgo() hd.PubKeyType
 }
 
+// Info2 is the publicly exposed information about a keypair
+type Info2 interface {
+	GetAddress2() types.AccAddress
+	// Public key
+	GetPubKey2() cryptotypes.PubKey
+	// Address
+}
+
 var (
-	_ Info = &localInfo{}
-	_ Info = &ledgerInfo{}
-	_ Info = &offlineInfo{}
-	_ Info = &multiInfo{}
+	_ Info  = &localInfo{}
+	_ Info  = &ledgerInfo{}
+	_ Info  = &offlineInfo{}
+	_ Info  = &multiInfo{}
+	_ Info2 = &LocalInfo2{}
 )
 
 // localInfo is the public information about a locally stored key
@@ -43,12 +52,23 @@ type localInfo struct {
 	Algo         hd.PubKeyType      `json:"algo"`
 }
 
+//LocalInfo2 asdasd
+type LocalInfo2 struct {
+	PubKey cryptotypes.PubKey `json:"pubkey"`
+}
+
 func newLocalInfo(name string, pub cryptotypes.PubKey, privArmor string, algo hd.PubKeyType) Info {
 	return &localInfo{
 		Name:         name,
 		PubKey:       pub,
 		PrivKeyArmor: privArmor,
 		Algo:         algo,
+	}
+}
+
+func newLocalInfo2(pub cryptotypes.PubKey) Info2 {
+	return &LocalInfo2{
+		PubKey: pub,
 	}
 }
 
@@ -68,7 +88,17 @@ func (i localInfo) GetPubKey() cryptotypes.PubKey {
 }
 
 // GetType implements Info interface
+func (i LocalInfo2) GetPubKey2() cryptotypes.PubKey {
+	return i.PubKey
+}
+
+// GetType implements Info interface
 func (i localInfo) GetAddress() types.AccAddress {
+	return i.PubKey.Address().Bytes()
+}
+
+// GetType implements Info interface
+func (i LocalInfo2) GetAddress2() types.AccAddress {
 	return i.PubKey.Address().Bytes()
 }
 

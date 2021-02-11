@@ -5,18 +5,21 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"sort"
 	"strconv"
 
 	bip39 "github.com/cosmos/go-bip39"
 	"github.com/spf13/cobra"
 	"github.com/tendermint/tendermint/libs/cli"
+	yaml "gopkg.in/yaml.v2"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/input"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	cryptokeyring "github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/multisig"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -252,14 +255,14 @@ func RunAddCmd(cmd *cobra.Command, args [100000]string, kb keyring.Keyring, inBu
 
 	// If we're using ledger, only thing we need is the path and the bech32 prefix.
 	if useLedger {
-		bech32PrefixAccAddr := sdk.GetConfig().GetBech32AccountAddrPrefix()
-		info, err := kb.SaveLedgerKey(name, hd.Secp256k1, bech32PrefixAccAddr, coinType, account, index)
+		//bech32PrefixAccAddr := sdk.GetConfig().GetBech32AccountAddrPrefix()
+		//info, err := kb.SaveLedgerKey(name, hd.Secp256k1, bech32PrefixAccAddr, coinType, account, index)
 
 		if err != nil {
 			return err
 		}
 
-		return printCreate(cmd, info, false, "")
+		//return printCreate(cmd, info, false, "")
 	}
 
 	// Get bip39 mnemonic
@@ -326,6 +329,10 @@ func RunAddCmd(cmd *cobra.Command, args [100000]string, kb keyring.Keyring, inBu
 		return err
 	}
 
+	info2 := keyring.LocalInfo2{
+		PubKey: info.GetPubKey(),
+	}
+
 	// Recover key from seed passphrase
 	if recover {
 		// Hide mnemonic from output
@@ -333,19 +340,19 @@ func RunAddCmd(cmd *cobra.Command, args [100000]string, kb keyring.Keyring, inBu
 		mnemonic = ""
 	}
 
-	return printCreate(cmd, info, showMnemonic, mnemonic)
+	return printCreate(cmd, info, info2, showMnemonic, mnemonic)
 }
 
-func printCreate(cmd *cobra.Command, info keyring.Info, showMnemonic bool, mnemonic string) error {
+func printCreate(cmd *cobra.Command, info keyring.Info, info2 keyring.Info2, showMnemonic bool, mnemonic string) error {
 	output, _ := cmd.Flags().GetString(cli.OutputFlag)
 
 	switch output {
 	case OutputFormatText:
-		cmd.PrintErrln()
-		printKeyInfo(cmd.OutOrStdout(), info, keyring.Bech32KeyOutput, output)
+		printTextInfos2(cmd.OutOrStdout(), info2, keyring.Bech32KeyOutput2)
+		//printKeyInfo(cmd.OutOrStdout(), info, keyring.Bech32KeyOutput, output)
 
 		// print mnemonic unless requested not to.
-		if showMnemonic {
+		if false {
 			fmt.Fprintln(cmd.ErrOrStderr(), "\n**Important** write this mnemonic phrase in a safe place.")
 			fmt.Fprintln(cmd.ErrOrStderr(), "It is the only way to recover your account if you ever forget your password.")
 			fmt.Fprintln(cmd.ErrOrStderr(), "")
@@ -373,4 +380,21 @@ func printCreate(cmd *cobra.Command, info keyring.Info, showMnemonic bool, mnemo
 	}
 
 	return nil
+}
+
+func printTextInfos2(w io.Writer, keyInfo cryptokeyring.Info2, bechKeyOut bechKeyOutFn2) {
+	ko, err := bechKeyOut(keyInfo)
+	if err != nil {
+		panic(err)
+	}
+	printTextInfos3(w, []cryptokeyring.KeyOutput2{ko})
+
+}
+
+func printTextInfos3(w io.Writer, kos []cryptokeyring.KeyOutput2) {
+	out, err := yaml.Marshal(&kos)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Fprintln(w, string(out))
 }

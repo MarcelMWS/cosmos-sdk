@@ -16,6 +16,14 @@ type KeyOutput struct {
 	PubKeys   []multisigPubKeyOutput `json:"pubkeys,omitempty" yaml:"pubkeys"`
 }
 
+type KeyOutput2 struct {
+	Address string `json:"address" yaml:"address"`
+}
+
+type KeyOutputSlim struct {
+	Address string `json:"address" yaml:"address"`
+}
+
 // NewKeyOutput creates a default KeyOutput instance without Mnemonic, Threshold and PubKeys
 func NewKeyOutput(name, keyType, address, pubkey string) KeyOutput {
 	return KeyOutput{
@@ -23,6 +31,13 @@ func NewKeyOutput(name, keyType, address, pubkey string) KeyOutput {
 		Type:    keyType,
 		Address: address,
 		PubKey:  pubkey,
+	}
+}
+
+// NewKeyOutput2 creates a default KeyOutput instance without Mnemonic, Threshold and PubKeys
+func NewKeyOutput2(address, pubkey string) KeyOutput2 {
+	return KeyOutput2{
+		Address: address,
 	}
 }
 
@@ -101,6 +116,34 @@ func Bech32KeyOutput(keyInfo Info) (KeyOutput, error) {
 		ko.Threshold = mInfo.Threshold
 		ko.PubKeys = pubKeys
 	}
+
+	return ko, nil
+}
+
+// Bech32KeyOutput2 create a KeyOutput in with "acc" Bech32 prefixes. If the
+func Bech32KeyOutput2(keyInfo Info2) (KeyOutput2, error) {
+	accAddr := sdk.AccAddress(keyInfo.GetPubKey2().Address().Bytes())
+	bechPubKey, err := sdk.Bech32ifyPubKey(sdk.Bech32PubKeyTypeAccPub, keyInfo.GetPubKey2())
+	if err != nil {
+		return KeyOutput2{}, err
+	}
+
+	ko := NewKeyOutput2(accAddr.String(), bechPubKey)
+
+	/* 	if mInfo, ok := keyInfo.(*multiInfo); ok {
+		pubKeys := make([]multisigPubKeyOutput, len(mInfo.PubKeys))
+
+		for i, pk := range mInfo.PubKeys {
+			accAddr := sdk.AccAddress(pk.PubKey.Address().Bytes())
+
+			bechPubKey, err := sdk.Bech32ifyPubKey(sdk.Bech32PubKeyTypeAccPub, pk.PubKey)
+			if err != nil {
+				return KeyOutput2{}, err
+			}
+
+			pubKeys[i] = multisigPubKeyOutput{accAddr.String(), bechPubKey, pk.Weight}
+		}
+	} */
 
 	return ko, nil
 }
