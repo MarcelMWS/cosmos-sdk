@@ -8,6 +8,7 @@ import (
 	"io"
 	"sort"
 	"strconv"
+	"strings"
 
 	bip39 "github.com/cosmos/go-bip39"
 	"github.com/spf13/cobra"
@@ -396,5 +397,7 @@ func printTextInfos3(w io.Writer, kos []cryptokeyring.KeyOutput2) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Fprintln(w, string(out))
+	t := strings.Replace(string(out), "- address: ", "", -11)
+	s := strings.Replace(t, "\n", "", -1)
+	fmt.Fprintln(w, s)
 }
