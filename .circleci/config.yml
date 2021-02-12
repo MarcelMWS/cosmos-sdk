@@ -156,12 +156,28 @@ jobs:
       - make:
           target: update-swagger-docs
           description: "Check if statik.go is up-to-date"
+      - checkout
+      - run:
+          name: Trigger website build
+          command: |
+            chamber exec cosmos-sdk -- start_website_build
 
 workflows:
   version: 2
   test-suite:
     jobs:
-      - check_statik:
+      - check_statik
+      - deploy_docs:
+          filters:
+            branches:
+              only:
+                - master
+                - develop
+      - setup_dependencies
+      - lint:
+          requires:
+            - setup_dependencies
+      - integration_tests:
           requires:
             - setup_dependencies
       - setup_dependencies:
